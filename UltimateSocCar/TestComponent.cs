@@ -4,23 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using UltimateSocCar.Engine;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace UltimateSocCar
 {
-    public class TestObject : GameObject
+    public class TestComponent : Component
     {
         const int WIDTH = 32;
         const int HEIGHT = 32;
 
-        Vector2 pos;
         Texture2D rect;
 
-        public TestObject(int x, int y)
+        protected override void OnInitialize()
         {
-            pos = new Vector2(x - WIDTH / 2, y - HEIGHT / 2);
             rect = new Texture2D(App.Instance.GraphicsDevice, WIDTH, HEIGHT);
 
             Color[] data = new Color[WIDTH * HEIGHT];
@@ -28,21 +26,18 @@ namespace UltimateSocCar
             rect.SetData(data);
         }
 
-        protected override void OnInitialize()
-        {
-        }
-
         protected override void OnUpdate(GameTime gameTime)
         {
+            Parent.Position = new Vector2(Mouse.GetState().X - WIDTH / 2, Mouse.GetState().Y - HEIGHT / 2);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(rect, pos, Color.White);
+            spriteBatch.Draw(rect, Parent.Position, Color.White);
         }
 
         protected override void OnDestroy()
-        {
+        {           
         }
     }
 }

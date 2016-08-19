@@ -14,6 +14,7 @@ namespace UltimateSocCar
     {
         protected override void OnInitialize()
         {
+            new GameObject().AddComponent<TestComponent>();
         }
 
         protected override void OnQuit()
@@ -22,16 +23,14 @@ namespace UltimateSocCar
 
         protected override void OnUpdate(GameTime gameTime)
         {
-            KeyboardState state = Keyboard.GetState();
+            if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
+                App.Instance.ChangeScene(new TestScene());
 
             if (Mouse.GetState().LeftButton == ButtonState.Pressed)
                 new TestObject(Mouse.GetState().X, Mouse.GetState().Y);
 
             if (Mouse.GetState().RightButton == ButtonState.Pressed)
                 App.Instance.Scene.FindGameObject<TestObject>()?.Destroy();
-
-            if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
-                App.Instance.ChangeScene(new TestScene());
         }
 
         protected override void OnPreDraw(SpriteBatch spriteBatch, GameTime gameTime)

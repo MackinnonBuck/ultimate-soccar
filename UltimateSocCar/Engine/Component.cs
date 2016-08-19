@@ -13,22 +13,22 @@ namespace UltimateSocCar.Engine
         /// <summary>
         /// Called when the Component is initialized.
         /// </summary>
-        public abstract void OnInitialize();
+        protected abstract void OnInitialize();
 
         /// <summary>
         /// Called when the Component is updated.
         /// </summary>
-        public abstract void OnUpdate(GameTime gameTime);
+        protected abstract void OnUpdate(GameTime gameTime);
 
         /// <summary>
         /// Called when the Component is drawn.
         /// </summary>
-        public abstract void OnDraw(SpriteBatch spriteBatch, GameTime gameTime);
+        protected abstract void OnDraw(SpriteBatch spriteBatch, GameTime gameTime);
 
         /// <summary>
         /// Called when the Component is destroyed.
         /// </summary>
-        public abstract void OnDestroy();
+        protected abstract void OnDestroy();
 
         GameObject _parent;
 

@@ -49,6 +49,7 @@
     <Compile Include="Engine\Scene.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestComponent.cs" />
     <Compile Include="TestObject.cs" />
     <Compile Include="TestScene.cs" />
   </ItemGroup>

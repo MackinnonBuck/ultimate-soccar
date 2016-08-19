@@ -30,8 +30,23 @@ namespace UltimateSocCar.Engine
 
         /// <summary>
         /// Called when the GameObject is destroyed.
-        /// </summary
+        /// </summary>
         protected virtual void OnDestroy() { }
+
+        /// <summary>
+        /// Stores position of the GameObject.
+        /// </summary>
+        public Vector2 Position { get; set; }
+
+        /// <summary>
+        /// Stores the scale of the GameObject.
+        /// </summary>
+        public Vector2 Scale { get; set; }
+
+        /// <summary>
+        /// Stores the rotation in degrees of the GameObject.
+        /// </summary>
+        public float Rotation { get; set; }
 
         private SafeList<Component> components;
 
@@ -41,7 +56,7 @@ namespace UltimateSocCar.Engine
         public GameObject()
         {
             components = new SafeList<Component>();
-
+            
             App.Instance.Scene._AddGameObject(this);
             OnInitialize();
         }
@@ -93,6 +108,7 @@ namespace UltimateSocCar.Engine
             T component = new T();
             component.Parent = this;
             components.Add(component);
+            component.Initialize();
 
             return component;
         }
