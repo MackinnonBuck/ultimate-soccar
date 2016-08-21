@@ -1,5 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FarseerPhysics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoEngine.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +12,11 @@ namespace MonoEngine.Core
 {
     public class GameObject
     {
+        private SafeList<Component> components;
+        private PhysicsBody physicsBody;
+        private Vector2 _position;
+        private float _rotation;
+
         /// <summary>
         /// Called when the GameObject is initialized.
         /// </summary>
@@ -19,7 +26,7 @@ namespace MonoEngine.Core
         /// Called when the GameObject is updated.
         /// </summary>
         /// <param name="gameTime"></param>
-        protected virtual void OnUpdate(GameTime gameTime) {  }
+        protected virtual void OnUpdate(GameTime gameTime) { }
 
         /// <summary>
         /// Called when the GameObject is Drawn.
@@ -32,11 +39,42 @@ namespace MonoEngine.Core
         /// Called when the GameObject is destroyed.
         /// </summary>
         protected virtual void OnDestroy() { }
-
+        
         /// <summary>
         /// Stores position of the GameObject.
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Vector2 Position
+        {
+            get
+            {
+                return physicsBody == null ? _position : ConvertUnits.ToDisplayUnits(physicsBody.Body.Position);
+            }
+            set
+            {
+                _position = value;
+
+                if (physicsBody != null)
+                    physicsBody.Body.Position = ConvertUnits.ToSimUnits(value);
+            }
+        }
+
+        /// <summary>
+        /// Stores the rotation in degrees of the GameObject.
+        /// </summary>
+        public float Rotation
+        {
+            get
+            {
+                return physicsBody == null ? _rotation : physicsBody.Body.Rotation;
+            }
+            set
+            {
+                _rotation = value;
+
+                if (physicsBody != null)
+                    physicsBody.Body.Rotation = value;
+            }
+        }
 
         /// <summary>
         /// Stores the scale of the GameObject.
@@ -44,18 +82,13 @@ namespace MonoEngine.Core
         public Vector2 Scale { get; set; }
 
         /// <summary>
-        /// Stores the rotation in degrees of the GameObject.
-        /// </summary>
-        public float Rotation { get; set; }
-
-        private SafeList<Component> components;
-
-        /// <summary>
         /// Initializes the GameObject.
         /// </summary>
         public GameObject()
         {
             components = new SafeList<Component>();
+            _position = Vector2.Zero;
+            _rotation = 0f;
             
             App.Instance.Scene.AddGameObject(this);
             OnInitialize();
@@ -94,6 +127,8 @@ namespace MonoEngine.Core
             foreach (Component c in components)
                 c.Destroy();
 
+            components.Clear();
+
             App.Instance.Scene.RemoveGameObject(this);
             OnDestroy();
         }
@@ -103,9 +138,9 @@ namespace MonoEngine.Core
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> FindComponents<T>() where T : Component
+        public List<T> GetComponents<T>() where T : Component
         {
-            return components.OfType<T>().ToList<T>();
+            return components.OfType<T>().ToList();
         }
 
         /// <summary>
@@ -113,9 +148,9 @@ namespace MonoEngine.Core
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T FindComponent<T>() where T : Component
+        public T GetComponent<T>() where T : Component
         {
-            List<T> comps = FindComponents<T>();
+            List<T> comps = GetComponents<T>();
 
             if (comps.Count > 0)
                 return comps[0];
@@ -135,6 +170,9 @@ namespace MonoEngine.Core
             components.Add(component);
             component.Initialize();
 
+            if (component is PhysicsBody)
+                physicsBody = component as PhysicsBody;
+
             return component;
         }
 
@@ -146,6 +184,9 @@ namespace MonoEngine.Core
         {
             if (components.Contains(component))
                 return;
+
+            if (component is PhysicsBody)
+                physicsBody = null;
 
             components.Remove(component);
         }

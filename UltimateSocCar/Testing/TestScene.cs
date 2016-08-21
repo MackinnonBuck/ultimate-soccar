@@ -16,6 +16,8 @@ namespace UltimateSocCar.Testing
 {
     public class TestScene : Scene
     {
+        PhysicsBody movingBody;
+
         protected override void OnInitialize()
         {
             DebugDrawEnabled = true;
@@ -35,32 +37,51 @@ namespace UltimateSocCar.Testing
             else if (Keyboard.GetState().IsKeyDown(Keys.D))
                 DebugDrawEnabled = false;
 
-            if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed || Mouse.GetState().RightButton == ButtonState.Pressed)
             {
-                PhysicsBody body = App.Instance.Scene.GetBodyAt(Mouse.GetState().Position.ToVector2());
+                if (movingBody == null)
+                {
+                    movingBody = GetBodyAt(Mouse.GetState().Position.ToVector2());
 
-                if (body != null)
-                    body.Parent.Destroy();
+                    if (movingBody == null)
+                    {
+                        GameObject newObject = new GameObject();
+                        newObject.Position = Mouse.GetState().Position.ToVector2();
+                        movingBody = newObject.AddComponent<PhysicsBody>();
+
+                        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+                        {
+                            RectangleShape rectangleShape = newObject.AddComponent<RectangleShape>();
+                            rectangleShape.Width = rectangleShape.Height = 0.25f;
+                        }
+                        else
+                        {
+                            newObject.AddComponent<CircleShape>().Radius = 0.5f;
+                        }
+                    }
+
+                    movingBody.BodyType = BodyType.Kinematic;
+                }
+
+                movingBody.Parent.Position = Mouse.GetState().Position.ToVector2();
+                movingBody.LinearVelocity = Vector2.Zero;
             }
             else
             {
-                if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+                if (movingBody != null)
                 {
-                    GameObject sphereObject = new GameObject();
-                    sphereObject.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
-                    sphereObject.AddComponent<PhysicsBody>();
-                    sphereObject.AddComponent<CircleShape>().Radius = 0.5f;
+                    if (movingBody.Parent.GetComponent<CircleShape>() != null)
+                        movingBody.BodyType = BodyType.Dynamic;
+
+                    movingBody = null;
                 }
-                else if (Mouse.GetState().RightButton == ButtonState.Pressed &&
-                    App.Instance.Scene.GetBodiesAt(Mouse.GetState().Position.ToVector2()).Count == 0)
+
+                if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
                 {
-                    GameObject boxObject = new GameObject();
-                    boxObject.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
-                    PhysicsBody body = boxObject.AddComponent<PhysicsBody>();
-                    body.BodyType = BodyType.Static;
-                    RectangleShape shape = boxObject.AddComponent<RectangleShape>();
-                    shape.Width = 0.25f;
-                    shape.Height = 0.25f;
+                    PhysicsBody body = App.Instance.Scene.GetBodyAt(Mouse.GetState().Position.ToVector2());
+
+                    if (body != null)
+                        body.Parent.Destroy();
                 }
             }
         }

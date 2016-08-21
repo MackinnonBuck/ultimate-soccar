@@ -21,7 +21,7 @@ namespace MonoEngine.Components
         internal Body Body { get; private set; }
 
         /// <summary>
-        /// Describes if the body is dynamic, kinematic, or static.
+        /// Describes if the PhysicsBody is dynamic, kinematic, or static.
         /// </summary>
         public BodyType BodyType
         {
@@ -32,6 +32,36 @@ namespace MonoEngine.Components
             set
             {
                 Body.BodyType = value;
+            }
+        }
+
+        /// <summary>
+        /// The linear velocity of the PhysicsBody.
+        /// </summary>
+        public Vector2 LinearVelocity
+        {
+            get
+            {
+                return Body.LinearVelocity;
+            }
+            set
+            {
+                Body.LinearVelocity = value;
+            }
+        }
+
+        /// <summary>
+        /// The angular velocity of the PhysicsBody.
+        /// </summary>
+        public float AngularVelocity
+        {
+            get
+            {
+                return Body.AngularVelocity;
+            }
+            set
+            {
+                Body.AngularVelocity = value;
             }
         }
 

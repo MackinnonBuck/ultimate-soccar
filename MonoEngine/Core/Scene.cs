@@ -186,7 +186,7 @@ namespace MonoEngine.Core
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>each GameObject of the given type.</returns>
-        public List<T> FindGameObjects<T>() where T : GameObject
+        public List<T> GetGameObjects<T>() where T : GameObject
         {
             return gameObjects.OfType<T>().ToList();
         }
@@ -196,9 +196,9 @@ namespace MonoEngine.Core
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>the first found GameObject of the given type.</returns>
-        public T FindGameObject<T>() where T : GameObject
+        public T GetGameObject<T>() where T : GameObject
         {
-            List<T> objects = FindGameObjects<T>();
+            List<T> objects = GetGameObjects<T>();
 
             if (objects.Count > 0)
                 return objects[0];

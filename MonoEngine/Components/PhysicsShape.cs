@@ -36,7 +36,7 @@ namespace MonoEngine.Components
 
         protected override void OnInitialize()
         {
-            List<PhysicsBody> physicsBodies = Parent.FindComponents<PhysicsBody>();
+            List<PhysicsBody> physicsBodies = Parent.GetComponents<PhysicsBody>();
 
             if (physicsBodies.Count == 1)
             {
