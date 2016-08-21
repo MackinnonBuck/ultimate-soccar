@@ -1,15 +1,28 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FarseerPhysics;
+using FarseerPhysics.DebugView;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoEngine.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UltimateSocCar.Engine
+namespace MonoEngine.Core
 {
     public abstract class Scene
     {
+        /// <summary>
+        /// The physics world of the scene.
+        /// </summary>
+        internal World PhysicsWorld { get; private set; }
+
+        DebugViewXNA debugView;
+
+        SafeList<GameObject> gameObjects;
+
         /// <summary>
         /// Called when the Scene is initialized.
         /// </summary>
@@ -39,14 +52,60 @@ namespace UltimateSocCar.Engine
         /// Called when the Scene is quitting.
         /// </summary>
         protected abstract void OnQuit();
-        
-        private SafeList<GameObject> gameObjects = new SafeList<GameObject>();
+
+        /// <summary>
+        /// The gravity of the physics world.
+        /// </summary>
+        public Vector2 Gravity
+        {
+            get
+            {
+                return PhysicsWorld.Gravity;
+            }
+            set
+            {
+                PhysicsWorld.Gravity = Gravity;
+            }
+        }
+
+        /// <summary>
+        /// Determines if debug drawing is enabled.
+        /// </summary>
+        public bool DebugDrawEnabled
+        {
+            get
+            {
+                return debugView.Enabled;
+            }
+            set
+            {
+                debugView.Enabled = value;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new Scene instance.
+        /// </summary>
+        public Scene()
+        {
+            gameObjects = new SafeList<GameObject>();
+        }
 
         /// <summary>
         /// Initializes the Scene.
         /// </summary>
         public void Initialize()
         {
+            PhysicsWorld = new World(new Vector2(0f, 9.81f));
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(64f);
+
+            debugView = new DebugViewXNA(PhysicsWorld);
+            debugView.AppendFlags(DebugViewFlags.DebugPanel);
+            debugView.AppendFlags(DebugViewFlags.ContactPoints);
+            debugView.AppendFlags(DebugViewFlags.ContactNormals);
+            debugView.LoadContent(App.Instance.GraphicsDevice, App.Instance.Content);
+            debugView.Enabled = false;
+
             OnInitialize();
         }
 
@@ -56,6 +115,8 @@ namespace UltimateSocCar.Engine
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
+            PhysicsWorld.Step(App.Instance.TargetElapsedTime.Milliseconds * 0.001f);
+
             foreach (GameObject g in gameObjects)
                 g.Update(gameTime);
 
@@ -75,6 +136,9 @@ namespace UltimateSocCar.Engine
                 g.Draw(spriteBatch, gameTime);
 
             OnPostDraw(spriteBatch, gameTime);
+
+            Matrix proj = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Width), ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Height), 0f, 0f, 1f);
+            debugView.RenderDebugData(ref proj);
         }
 
         /// <summary>
@@ -85,7 +149,36 @@ namespace UltimateSocCar.Engine
             foreach (GameObject g in gameObjects)
                 g.Destroy();
 
+            PhysicsWorld.Clear();
+            gameObjects.Clear();
+            debugView.Dispose();
+
             OnQuit();
+        }
+
+        /// <summary>
+        /// Returns a list of PhysicsBodies located at the given point.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>true if a body exists at the given point.</returns>
+        public List<PhysicsBody> GetBodiesAt(Vector2 point)
+        {
+            return PhysicsWorld.TestPointAll(ConvertUnits.ToSimUnits(point)).ConvertAll(fixture => (PhysicsBody)fixture.Body.UserData);
+        }
+
+        /// <summary>
+        /// Returns the first PhysicsBody located at the given point. If no PhysicsBody is found, null is returned.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>the first PhysicsBody located at the given point, or null of no PhysicsBody is found.</returns>
+        public PhysicsBody GetBodyAt(Vector2 point)
+        {
+            Fixture fixture = PhysicsWorld.TestPoint(ConvertUnits.ToSimUnits(point));
+
+            if (fixture != null)
+                return (PhysicsBody)fixture.Body.UserData;
+
+            return null;
         }
         
         /// <summary>
@@ -95,7 +188,7 @@ namespace UltimateSocCar.Engine
         /// <returns>each GameObject of the given type.</returns>
         public List<T> FindGameObjects<T>() where T : GameObject
         {
-            return new List<T>(gameObjects.OfType<T>());
+            return gameObjects.OfType<T>().ToList();
         }
 
         /// <summary>
@@ -114,10 +207,10 @@ namespace UltimateSocCar.Engine
         }
 
         /// <summary>
-        /// Adds a GameObject to the Scene (only to be called by core engine).
+        /// Adds a GameObject to the Scene.
         /// </summary>
         /// <param name="gameObject"></param>
-        public void _AddGameObject(GameObject gameObject)
+        internal void AddGameObject(GameObject gameObject)
         {
             if (gameObjects.Contains(gameObject))
                 return;
@@ -126,10 +219,10 @@ namespace UltimateSocCar.Engine
         }
 
         /// <summary>
-        /// Removes a GameObject from the Scene (only to be called by core engine).
+        /// Removes a GameObject from the Scene.
         /// </summary>
         /// <param name="gameObject"></param>
-        public void _RemoveGameObject(GameObject gameObject)
+        internal void RemoveGameObject(GameObject gameObject)
         {
             if (!gameObjects.Contains(gameObject))
                 return;

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UltimateSocCar.Engine
+namespace MonoEngine.Core
 {
     public abstract class Component
     {
@@ -41,7 +41,7 @@ namespace UltimateSocCar.Engine
             {
                 return _parent;
             }
-            set
+            internal set
             {
                 if (_parent == null)
                     _parent = value;
@@ -82,7 +82,7 @@ namespace UltimateSocCar.Engine
         /// </summary>
         public void Destroy()
         {
-            Parent._RemoveComponent(this);
+            Parent.RemoveComponent(this);
             OnDestroy();
         }
     }

@@ -4,16 +4,13 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace UltimateSocCar.Engine
+namespace MonoEngine.Core
 {
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
     public class App : Game
     {
-        int bufferWidth;
-        int bufferHeight;
-
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
@@ -54,10 +51,10 @@ namespace UltimateSocCar.Engine
             Content.RootDirectory = "Content";
 
             Window.Title = title;
-
+            
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = bufferWidth = width;
-            graphics.PreferredBackBufferHeight = bufferHeight = height;
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
             graphics.IsFullScreen = isFullScreen;
 
             TargetElapsedTime = System.TimeSpan.FromSeconds(1.0 / frameRate);

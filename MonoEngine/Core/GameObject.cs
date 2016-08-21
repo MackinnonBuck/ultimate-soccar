@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UltimateSocCar.Engine
+namespace MonoEngine.Core
 {
     public class GameObject
     {
@@ -57,7 +57,7 @@ namespace UltimateSocCar.Engine
         {
             components = new SafeList<Component>();
             
-            App.Instance.Scene._AddGameObject(this);
+            App.Instance.Scene.AddGameObject(this);
             OnInitialize();
         }
 
@@ -94,8 +94,33 @@ namespace UltimateSocCar.Engine
             foreach (Component c in components)
                 c.Destroy();
 
-            App.Instance.Scene._RemoveGameObject(this);
+            App.Instance.Scene.RemoveGameObject(this);
             OnDestroy();
+        }
+
+        /// <summary>
+        /// Finds and returns each Component of the given type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> FindComponents<T>() where T : Component
+        {
+            return components.OfType<T>().ToList<T>();
+        }
+
+        /// <summary>
+        /// Finds and returns the first found GameObject of the given type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T FindComponent<T>() where T : Component
+        {
+            List<T> comps = FindComponents<T>();
+
+            if (comps.Count > 0)
+                return comps[0];
+
+            return null;
         }
 
         /// <summary>
@@ -103,7 +128,7 @@ namespace UltimateSocCar.Engine
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public Component AddComponent<T>() where T : Component, new()
+        public T AddComponent<T>() where T : Component, new()
         {
             T component = new T();
             component.Parent = this;
@@ -117,7 +142,7 @@ namespace UltimateSocCar.Engine
         /// Removes a Component from the GameObject (only to be called by core engine).
         /// </summary>
         /// <param name="component"></param>
-        public void _RemoveComponent(Component component)
+        internal void RemoveComponent(Component component)
         {
             if (components.Contains(component))
                 return;
