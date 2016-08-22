@@ -21,7 +21,7 @@ namespace MonoEngine.Core
 
         DebugViewXNA debugView;
 
-        SafeList<GameObject> gameObjects;
+        List<GameObject> gameObjects;
 
         /// <summary>
         /// Called when the Scene is initialized.
@@ -88,7 +88,7 @@ namespace MonoEngine.Core
         /// </summary>
         public Scene()
         {
-            gameObjects = new SafeList<GameObject>();
+            gameObjects = new List<GameObject>();
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace MonoEngine.Core
         {
             PhysicsWorld.Step(App.Instance.TargetElapsedTime.Milliseconds * 0.001f);
 
-            foreach (GameObject g in gameObjects)
+            foreach (GameObject g in gameObjects.ToList())
                 g.Update(gameTime);
 
             OnUpdate(gameTime);
@@ -132,7 +132,7 @@ namespace MonoEngine.Core
         {
             OnPreDraw(spriteBatch, gameTime);
 
-            foreach (GameObject g in gameObjects)
+            foreach (GameObject g in gameObjects.ToList())
                 g.Draw(spriteBatch, gameTime);
 
             OnPostDraw(spriteBatch, gameTime);
@@ -146,7 +146,7 @@ namespace MonoEngine.Core
         /// </summary>
         public void Quit()
         {
-            foreach (GameObject g in gameObjects)
+            foreach (GameObject g in gameObjects.ToList())
                 g.Destroy();
 
             PhysicsWorld.Clear();

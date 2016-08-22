@@ -12,10 +12,14 @@ namespace MonoEngine.Core
 {
     public class GameObject
     {
-        private SafeList<Component> components;
-        private PhysicsBody physicsBody;
+        private List<Component> components;
         private Vector2 _position;
         private float _rotation;
+
+        /// <summary>
+        /// Used to quickly reference the GameObject's PhysicsBody (needed for internal performance).
+        /// </summary>
+        internal PhysicsBody PhysicsBody { get; private set; }
 
         /// <summary>
         /// Called when the GameObject is initialized.
@@ -47,14 +51,14 @@ namespace MonoEngine.Core
         {
             get
             {
-                return physicsBody == null ? _position : ConvertUnits.ToDisplayUnits(physicsBody.Body.Position);
+                return PhysicsBody == null ? _position : PhysicsBody.Position;
             }
             set
             {
                 _position = value;
 
-                if (physicsBody != null)
-                    physicsBody.Body.Position = ConvertUnits.ToSimUnits(value);
+                if (PhysicsBody != null)
+                    PhysicsBody.Position = value;
             }
         }
 
@@ -65,14 +69,14 @@ namespace MonoEngine.Core
         {
             get
             {
-                return physicsBody == null ? _rotation : physicsBody.Body.Rotation;
+                return PhysicsBody == null ? _rotation : PhysicsBody.Body.Rotation;
             }
             set
             {
                 _rotation = value;
 
-                if (physicsBody != null)
-                    physicsBody.Body.Rotation = value;
+                if (PhysicsBody != null)
+                    PhysicsBody.Body.Rotation = value;
             }
         }
 
@@ -86,7 +90,7 @@ namespace MonoEngine.Core
         /// </summary>
         public GameObject()
         {
-            components = new SafeList<Component>();
+            components = new List<Component>();
             _position = Vector2.Zero;
             _rotation = 0f;
             
@@ -100,7 +104,7 @@ namespace MonoEngine.Core
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
-            foreach (Component c in components)
+            foreach (Component c in components.ToList())
                 c.Update(gameTime);
 
             OnUpdate(gameTime);
@@ -113,7 +117,7 @@ namespace MonoEngine.Core
         /// <param name="gameTime"></param>
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            foreach (Component c in components)
+            foreach (Component c in components.ToList())
                 c.Draw(spriteBatch, gameTime);
 
             OnDraw(spriteBatch, gameTime);
@@ -124,7 +128,7 @@ namespace MonoEngine.Core
         /// </summary>
         public void Destroy()
         {
-            foreach (Component c in components)
+            foreach (Component c in components.ToList())
                 c.Destroy();
 
             components.Clear();
@@ -171,7 +175,12 @@ namespace MonoEngine.Core
             component.Initialize();
 
             if (component is PhysicsBody)
-                physicsBody = component as PhysicsBody;
+            {
+                if (PhysicsBody == null)
+                    PhysicsBody = component as PhysicsBody;
+                else
+                    Debug.Log("Cannot add more than one PhysicsBody to a GameObject.", Debug.LogSeverity.ERROR);
+            }
 
             return component;
         }
@@ -186,7 +195,7 @@ namespace MonoEngine.Core
                 return;
 
             if (component is PhysicsBody)
-                physicsBody = null;
+                PhysicsBody = null;
 
             components.Remove(component);
         }

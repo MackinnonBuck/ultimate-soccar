@@ -57,7 +57,7 @@ namespace MonoEngine.Components
 
         protected override Fixture CreateFixture()
         {
-            return FixtureFactory.AttachCircle(Radius, Density, parentBody);
+            return FixtureFactory.AttachCircle(Radius, Density, Parent.PhysicsBody.Body);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

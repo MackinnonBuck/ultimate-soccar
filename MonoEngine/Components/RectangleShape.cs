@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Common;
+using MonoEngine.Core;
 
 namespace MonoEngine.Components
 {
@@ -76,7 +77,7 @@ namespace MonoEngine.Components
 
         protected override Fixture CreateFixture()
         {
-            return FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, parentBody);
+            return FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.PhysicsBody.Body);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

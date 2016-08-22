@@ -36,6 +36,53 @@ namespace MonoEngine.Components
         }
 
         /// <summary>
+        /// The mass of the PhysicsBody.
+        /// </summary>
+        public float Mass
+        {
+            get
+            {
+                return Body.Mass;
+            }
+            set
+            {
+                Body.Mass = value;
+            }
+        }
+
+        /// <summary>
+        /// The position of the PhysicsBody.
+        /// </summary>
+        public Vector2 Position
+        {
+            get
+            {
+                return ConvertUnits.ToDisplayUnits(Body.Position);
+            }
+            set
+            {
+                Body.Position = ConvertUnits.ToSimUnits(value);
+                Body.Awake = true;
+            }
+        }
+
+        /// <summary>
+        /// The rotation of the PhysicsBody.
+        /// </summary>
+        public float Rotation
+        {
+            get
+            {
+                return Body.Rotation;
+            }
+            set
+            {
+                Body.Rotation = value;
+                Body.Awake = true;
+            }
+        }
+
+        /// <summary>
         /// The linear velocity of the PhysicsBody.
         /// </summary>
         public Vector2 LinearVelocity
@@ -65,11 +112,99 @@ namespace MonoEngine.Components
             }
         }
 
+        /// <summary>
+        /// The linear damping of the PhysicsBody.
+        /// </summary>
+        public float LinearDamping
+        {
+            get
+            {
+                return Body.LinearDamping;
+            }
+            set
+            {
+                Body.LinearDamping = value;
+            }
+        }
+
+        /// <summary>
+        /// The angular damping of the PhysicsBody.
+        /// </summary>
+        public float AngularDamping
+        {
+            get
+            {
+                return Body.AngularDamping;
+            }
+            set
+            {
+                Body.AngularDamping = value;
+            }
+        }
+
+        /// <summary>
+        /// Applies a force to the PhysicsBody.
+        /// </summary>
+        /// <param name="force"></param>
+        /// <param name="point"></param>
+        public void ApplyForce(Vector2 force)
+        {
+            Body.ApplyForce(force, Body.Position);
+        }
+
+        /// <summary>
+        /// Applies a force to the PhysicsBody at a specified point.
+        /// </summary>
+        /// <param name="force"></param>
+        /// <param name="point"></param>
+        public void ApplyForce(Vector2 force, Vector2 point)
+        {
+            Body.ApplyForce(force, ConvertUnits.ToSimUnits(point));
+        }
+
+        /// <summary>
+        /// Applies a torque to the PhysicsBody.
+        /// </summary>
+        /// <param name="torque"></param>
+        public void ApplyTorque(float torque)
+        {
+            Body.ApplyTorque(torque);
+        }
+
+        /// <summary>
+        /// Appleis a linear impulse to the PhysicsBody.
+        /// </summary>
+        /// <param name="impulse"></param>
+        /// <param name="point"></param>
+        public void ApplyLinearImpulse(Vector2 impulse)
+        {
+            Body.ApplyLinearImpulse(impulse, Body.Position);
+        }
+
+        /// <summary>
+        /// Appleis a linear impulse to the PhysicsBody at a specified point.
+        /// </summary>
+        /// <param name="impulse"></param>
+        /// <param name="point"></param>
+        public void ApplyLinearImpulse(Vector2 impulse, Vector2 point)
+        {
+            Body.ApplyLinearImpulse(impulse, ConvertUnits.ToSimUnits(point));
+        }
+
+        /// <summary>
+        /// Applies an angular impulse to the PhysicsBody.
+        /// </summary>
+        /// <param name="impulse"></param>
+        public void ApplyAngularImpulse(float impulse)
+        {
+            Body.ApplyAngularImpulse(impulse);
+        }
+
         protected override void OnInitialize()
         {
             Body = BodyFactory.CreateBody(App.Instance.Scene.PhysicsWorld, ConvertUnits.ToSimUnits(Parent.Position.X, Parent.Position.Y), Parent.Rotation);
             Body.UserData = this;
-            BodyType = BodyType.Dynamic;
+            Body.BodyType = BodyType.Dynamic;
         }
 
         protected override void OnUpdate(GameTime gameTime)
@@ -81,7 +216,8 @@ namespace MonoEngine.Components
         }
 
         protected override void OnDestroy()
-        {   
+        {
+            App.Instance.Scene.PhysicsWorld.RemoveBody(Body);
         }
     }
 }

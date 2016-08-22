@@ -52,26 +52,30 @@ namespace UltimateSocCar.Testing
                         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
                         {
                             RectangleShape rectangleShape = newObject.AddComponent<RectangleShape>();
-                            rectangleShape.Width = rectangleShape.Height = 0.25f;
+                            rectangleShape.Width = rectangleShape.Height = 0.5f;
                         }
                         else
                         {
-                            newObject.AddComponent<CircleShape>().Radius = 0.5f;
+                            CircleShape circleShape = newObject.AddComponent<CircleShape>();
+                            circleShape.Radius = 0.5f;
                         }
                     }
 
-                    movingBody.BodyType = BodyType.Kinematic;
+                    movingBody.BodyType = BodyType.Dynamic;
+                    movingBody.Mass = 1f;
+                    movingBody.LinearDamping = movingBody.AngularDamping = 25f;
                 }
 
-                movingBody.Parent.Position = Mouse.GetState().Position.ToVector2();
-                movingBody.LinearVelocity = Vector2.Zero;
+                movingBody.ApplyForce((Mouse.GetState().Position.ToVector2() - movingBody.Position) * 25f);
             }
             else
             {
                 if (movingBody != null)
                 {
-                    if (movingBody.Parent.GetComponent<CircleShape>() != null)
-                        movingBody.BodyType = BodyType.Dynamic;
+                    movingBody.LinearDamping = movingBody.AngularDamping = 0f;
+
+                    if (movingBody.Parent.GetComponent<RectangleShape>() != null)
+                        movingBody.BodyType = BodyType.Static;
 
                     movingBody = null;
                 }

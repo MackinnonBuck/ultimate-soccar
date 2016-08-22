@@ -14,7 +14,6 @@ namespace MonoEngine.Components
 {
     public abstract class PhysicsShape<T> : Component where T : Shape
     {
-        protected Body parentBody;
         protected Fixture fixture;
 
         /// <summary>
@@ -36,27 +35,16 @@ namespace MonoEngine.Components
 
         protected override void OnInitialize()
         {
-            List<PhysicsBody> physicsBodies = Parent.GetComponents<PhysicsBody>();
-
-            if (physicsBodies.Count == 1)
-            {
-                parentBody = physicsBodies[0].Body;
-                fixture = CreateFixture();
-            }
+            if (Parent.PhysicsBody == null)
+                Debug.Log("Cannot add a PhysicsShape to a GameObject without first adding a PhysicsBody.", Debug.LogSeverity.ERROR);
             else
-            {
-                if (physicsBodies.Count == 0)
-                    Debug.Log("Cannot add a PhysicsShape to a GameObject without first adding a PhysicsBody.", Debug.LogSeverity.ERROR);
-                else
-                    Debug.Log("Cannot add a PhysicsShape to a GameObject with multiple PhysicsBodies.", Debug.LogSeverity.ERROR);
-
-                Destroy();
-            }
+                fixture = CreateFixture();
         }
 
         protected override void OnDestroy()
         {
-            parentBody?.DestroyFixture(fixture);
+            if (Parent.PhysicsBody != null)
+                Parent.PhysicsBody.Body.DestroyFixture(fixture);
         }
     }
 }
