@@ -30,6 +30,11 @@ namespace MonoEngine.Core
         /// </summary>
         protected abstract void OnDestroy();
 
+        /// <summary>
+        /// Used for determining if the Component has been destroyed.
+        /// </summary>
+        public bool IsDestroyed { get; private set; }
+
         GameObject _parent;
 
         /// <summary>
@@ -55,6 +60,8 @@ namespace MonoEngine.Core
         /// </summary>
         public void Initialize()
         {
+            IsDestroyed = false;
+
             OnInitialize();
         }
 
@@ -84,6 +91,8 @@ namespace MonoEngine.Core
         {
             Parent.RemoveComponent(this);
             OnDestroy();
+
+            IsDestroyed = true;
         }
     }
 }

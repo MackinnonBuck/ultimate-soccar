@@ -118,7 +118,8 @@ namespace MonoEngine.Core
             PhysicsWorld.Step(App.Instance.TargetElapsedTime.Milliseconds * 0.001f);
 
             foreach (GameObject g in gameObjects.ToList())
-                g.Update(gameTime);
+                if (!g.IsDestroyed)
+                    g.Update(gameTime);
 
             OnUpdate(gameTime);
         }
@@ -133,7 +134,8 @@ namespace MonoEngine.Core
             OnPreDraw(spriteBatch, gameTime);
 
             foreach (GameObject g in gameObjects.ToList())
-                g.Draw(spriteBatch, gameTime);
+                if (!g.IsDestroyed)
+                    g.Draw(spriteBatch, gameTime);
 
             OnPostDraw(spriteBatch, gameTime);
 
@@ -147,7 +149,8 @@ namespace MonoEngine.Core
         public void Quit()
         {
             foreach (GameObject g in gameObjects.ToList())
-                g.Destroy();
+                if (!g.IsDestroyed)
+                    g.Destroy();
 
             PhysicsWorld.Clear();
             gameObjects.Clear();

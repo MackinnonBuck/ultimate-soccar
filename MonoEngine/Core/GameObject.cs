@@ -1,6 +1,7 @@
 ﻿using FarseerPhysics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoEngine.Components;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,11 @@ namespace MonoEngine.Core
         /// </summary>
         protected virtual void OnDestroy() { }
         
+        /// <summary>
+        /// Used for determining if the GameObject has been destroyed.
+        /// </summary>
+        public bool IsDestroyed { get; private set; }
+
         /// <summary>
         /// Stores position of the GameObject.
         /// </summary>
@@ -90,6 +96,8 @@ namespace MonoEngine.Core
         /// </summary>
         public GameObject()
         {
+            IsDestroyed = false;
+
             components = new List<Component>();
             _position = Vector2.Zero;
             _rotation = 0f;
@@ -105,7 +113,8 @@ namespace MonoEngine.Core
         public void Update(GameTime gameTime)
         {
             foreach (Component c in components.ToList())
-                c.Update(gameTime);
+                if (!c.IsDestroyed)
+                    c.Update(gameTime);
 
             OnUpdate(gameTime);
         }
@@ -118,7 +127,8 @@ namespace MonoEngine.Core
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             foreach (Component c in components.ToList())
-                c.Draw(spriteBatch, gameTime);
+                if (!c.IsDestroyed)
+                    c.Draw(spriteBatch, gameTime);
 
             OnDraw(spriteBatch, gameTime);
         }
@@ -129,12 +139,15 @@ namespace MonoEngine.Core
         public void Destroy()
         {
             foreach (Component c in components.ToList())
-                c.Destroy();
+                if (!c.IsDestroyed)
+                    c.Destroy();
 
             components.Clear();
 
             App.Instance.Scene.RemoveGameObject(this);
             OnDestroy();
+
+            IsDestroyed = true;
         }
 
         /// <summary>
