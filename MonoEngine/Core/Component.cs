@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public abstract class Component
+    public abstract class Component : IEntity
     {
+        bool isDestroyed;
+
         /// <summary>
         /// Called when the Component is initialized.
         /// </summary>
@@ -29,11 +31,6 @@ namespace MonoEngine.Core
         /// Called when the Component is destroyed.
         /// </summary>
         protected abstract void OnDestroy();
-
-        /// <summary>
-        /// Used for determining if the Component has been destroyed.
-        /// </summary>
-        public bool IsDestroyed { get; private set; }
 
         GameObject _parent;
 
@@ -60,7 +57,7 @@ namespace MonoEngine.Core
         /// </summary>
         public void Initialize()
         {
-            IsDestroyed = false;
+            isDestroyed = false;
 
             OnInitialize();
         }
@@ -92,7 +89,12 @@ namespace MonoEngine.Core
             Parent.RemoveComponent(this);
             OnDestroy();
 
-            IsDestroyed = true;
+            isDestroyed = true;
+        }
+
+        bool IEntity.IsDestroyed()
+        {
+            return isDestroyed;
         }
     }
 }

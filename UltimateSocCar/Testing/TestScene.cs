@@ -45,7 +45,7 @@ namespace UltimateSocCar.Testing
 
                     if (movingBody == null)
                     {
-                        GameObject newObject = new GameObject();
+                        GameObject newObject = new GameObject(App.Instance.Scene.GetChild<GameObject>());
                         newObject.Position = Mouse.GetState().Position.ToVector2();
                         movingBody = newObject.AddComponent<PhysicsBody>();
 

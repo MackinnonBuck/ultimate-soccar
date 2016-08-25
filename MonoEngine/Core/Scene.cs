@@ -12,16 +12,17 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public abstract class Scene
+    public abstract class Scene : Container<GameObject>
     {
         /// <summary>
         /// The physics world of the scene.
         /// </summary>
         internal World PhysicsWorld { get; private set; }
 
+        /// <summary>
+        /// The debug drawer of the physics world.
+        /// </summary>
         DebugViewXNA debugView;
-
-        List<GameObject> gameObjects;
 
         /// <summary>
         /// Called when the Scene is initialized.
@@ -88,7 +89,6 @@ namespace MonoEngine.Core
         /// </summary>
         public Scene()
         {
-            gameObjects = new List<GameObject>();
         }
 
         /// <summary>
@@ -113,14 +113,11 @@ namespace MonoEngine.Core
         /// Updates the Scene.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             PhysicsWorld.Step(App.Instance.TargetElapsedTime.Milliseconds * 0.001f);
 
-            foreach (GameObject g in gameObjects.ToList())
-                if (!g.IsDestroyed)
-                    g.Update(gameTime);
-
+            base.Update(gameTime);
             OnUpdate(gameTime);
         }
 
@@ -129,14 +126,10 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             OnPreDraw(spriteBatch, gameTime);
-
-            foreach (GameObject g in gameObjects.ToList())
-                if (!g.IsDestroyed)
-                    g.Draw(spriteBatch, gameTime);
-
+            base.Draw(spriteBatch, gameTime);
             OnPostDraw(spriteBatch, gameTime);
 
             Matrix proj = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Width), ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Height), 0f, 0f, 1f);
@@ -146,14 +139,10 @@ namespace MonoEngine.Core
         /// <summary>
         /// Quits the Scene.
         /// </summary>
-        public void Quit()
+        public override void Destroy()
         {
-            foreach (GameObject g in gameObjects.ToList())
-                if (!g.IsDestroyed)
-                    g.Destroy();
-
+            base.Destroy();
             PhysicsWorld.Clear();
-            gameObjects.Clear();
             debugView.Dispose();
 
             OnQuit();
@@ -182,55 +171,6 @@ namespace MonoEngine.Core
                 return (PhysicsBody)fixture.Body.UserData;
 
             return null;
-        }
-        
-        /// <summary>
-        /// Finds and returns each GameObject of the given type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>each GameObject of the given type.</returns>
-        public List<T> GetGameObjects<T>() where T : GameObject
-        {
-            return gameObjects.OfType<T>().ToList();
-        }
-
-        /// <summary>
-        /// Finds and returns the first found GameObject of the given type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>the first found GameObject of the given type.</returns>
-        public T GetGameObject<T>() where T : GameObject
-        {
-            List<T> objects = GetGameObjects<T>();
-
-            if (objects.Count > 0)
-                return objects[0];
-
-            return null;
-        }
-
-        /// <summary>
-        /// Adds a GameObject to the Scene.
-        /// </summary>
-        /// <param name="gameObject"></param>
-        internal void AddGameObject(GameObject gameObject)
-        {
-            if (gameObjects.Contains(gameObject))
-                return;
-
-            gameObjects.Add(gameObject);
-        }
-
-        /// <summary>
-        /// Removes a GameObject from the Scene.
-        /// </summary>
-        /// <param name="gameObject"></param>
-        internal void RemoveGameObject(GameObject gameObject)
-        {
-            if (!gameObjects.Contains(gameObject))
-                return;
-
-            gameObjects.Remove(gameObject);
         }
     }
 }

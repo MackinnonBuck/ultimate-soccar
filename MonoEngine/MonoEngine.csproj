@@ -53,7 +53,9 @@
     <Compile Include="Core\App.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Core\Debug.cs" />
+    <Compile Include="Core\IEntity.cs" />
     <Compile Include="Core\GameObject.cs" />
+    <Compile Include="Core\Container.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

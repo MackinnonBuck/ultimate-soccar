@@ -110,7 +110,7 @@ namespace MonoEngine.Core
         {
             if (futureScene != null)
             {
-                Scene?.Quit();
+                Scene?.Destroy();
 
                 Scene = futureScene;
                 futureScene = null;

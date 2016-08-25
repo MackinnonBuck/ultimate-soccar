@@ -11,11 +11,14 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public class GameObject
+    public class GameObject : Container<GameObject>, IEntity
     {
-        private List<Component> components;
-        private Vector2 _position;
-        private float _rotation;
+        bool isDestroyed;
+
+        /// <summary>
+        /// The components of this GameObject.
+        /// </summary>
+        Container<Component> components;
 
         /// <summary>
         /// Used to quickly reference the GameObject's PhysicsBody (needed for internal performance).
@@ -44,11 +47,13 @@ namespace MonoEngine.Core
         /// Called when the GameObject is destroyed.
         /// </summary>
         protected virtual void OnDestroy() { }
-        
+
         /// <summary>
-        /// Used for determining if the GameObject has been destroyed.
+        /// The parent of this GameObject.
         /// </summary>
-        public bool IsDestroyed { get; private set; }
+        public GameObject Parent { get; private set; }
+
+        Vector2 _position;
 
         /// <summary>
         /// Stores position of the GameObject.
@@ -67,6 +72,8 @@ namespace MonoEngine.Core
                     PhysicsBody.Position = value;
             }
         }
+
+        float _rotation;
 
         /// <summary>
         /// Stores the rotation in degrees of the GameObject.
@@ -92,29 +99,44 @@ namespace MonoEngine.Core
         public Vector2 Scale { get; set; }
 
         /// <summary>
-        /// Initializes the GameObject.
+        /// Creates the GameObject with a parent.
         /// </summary>
-        public GameObject()
+        public GameObject(Container<GameObject> parentObject)
         {
-            IsDestroyed = false;
+            isDestroyed = false;
 
-            components = new List<Component>();
+            components = new Container<Component>();
             _position = Vector2.Zero;
             _rotation = 0f;
-            
-            App.Instance.Scene.AddGameObject(this);
+
+            if (parentObject == null)
+            {
+                App.Instance.Scene.AddChild(this);
+            }
+            else
+            {
+                Parent = (GameObject)parentObject;
+                parentObject.AddChild(this);
+            }
+
             OnInitialize();
+        }
+
+        /// <summary>
+        /// Creates the GameObject without a parent.
+        /// </summary>
+        public GameObject() : this(null)
+        {
         }
 
         /// <summary>
         /// Updates the GameObject.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            foreach (Component c in components.ToList())
-                if (!c.IsDestroyed)
-                    c.Update(gameTime);
+            components.Update(gameTime);
+            base.Update(gameTime);
 
             OnUpdate(gameTime);
         }
@@ -124,67 +146,45 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            foreach (Component c in components.ToList())
-                if (!c.IsDestroyed)
-                    c.Draw(spriteBatch, gameTime);
-
+            components.Draw(spriteBatch, gameTime);
+            base.Draw(spriteBatch, gameTime);
             OnDraw(spriteBatch, gameTime);
         }
 
         /// <summary>
         /// Destroys the GameObject.
         /// </summary>
-        public void Destroy()
+        public override void Destroy()
         {
-            foreach (Component c in components.ToList())
-                if (!c.IsDestroyed)
-                    c.Destroy();
+            components.Destroy();
+            base.Destroy();
 
-            components.Clear();
-
-            App.Instance.Scene.RemoveGameObject(this);
+            App.Instance.Scene.RemoveChild(this);
             OnDestroy();
 
-            IsDestroyed = true;
+            isDestroyed = true;
         }
 
         /// <summary>
-        /// Finds and returns each Component of the given type.
+        /// Used for determining if the GameObject has been destroyed.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> GetComponents<T>() where T : Component
+        bool IEntity.IsDestroyed()
         {
-            return components.OfType<T>().ToList();
+            return isDestroyed;
         }
 
         /// <summary>
-        /// Finds and returns the first found GameObject of the given type.
+        /// Adds a Component to the GameObject.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T GetComponent<T>() where T : Component
-        {
-            List<T> comps = GetComponents<T>();
-
-            if (comps.Count > 0)
-                return comps[0];
-
-            return null;
-        }
-
-        /// <summary>
-        /// Adds a Component of the given type to the GameObject.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         public T AddComponent<T>() where T : Component, new()
         {
             T component = new T();
+            components.AddChild(component);
             component.Parent = this;
-            components.Add(component);
             component.Initialize();
 
             if (component is PhysicsBody)
@@ -199,18 +199,37 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Removes a Component from the GameObject (only to be called by core engine).
+        /// Gets all Components of the given type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> GetComponents<T>() where T : Component
+        {
+            return components.GetChildren<T>();
+        }
+
+        /// <summary>
+        /// Gets the first Component of the given type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetComponent<T>() where T : Component
+        {
+            List<T> components = GetComponents<T>();
+
+            if (components.Count > 0)
+                return components[0];
+
+            return null;
+        }
+
+        /// <summary>
+        /// Removes the component from this GameObject.
         /// </summary>
         /// <param name="component"></param>
         internal void RemoveComponent(Component component)
         {
-            if (components.Contains(component))
-                return;
-
-            if (component is PhysicsBody)
-                PhysicsBody = null;
-
-            components.Remove(component);
+            components.RemoveChild(component);
         }
     }
 }
