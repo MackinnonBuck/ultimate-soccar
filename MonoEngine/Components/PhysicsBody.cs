@@ -202,9 +202,19 @@ namespace MonoEngine.Components
 
         protected override void OnInitialize()
         {
+            if (Parent.GetComponents<PhysicsBody>().Count > 1)
+            {
+                Debug.Log("Cannot add more than one PhysicsBody to a GameObject.", Debug.LogSeverity.ERROR);
+                Destroy();
+                return;
+            }
+            
             Body = BodyFactory.CreateBody(App.Instance.Scene.PhysicsWorld, ConvertUnits.ToSimUnits(Parent.Position.X, Parent.Position.Y), Parent.Rotation);
             Body.UserData = this;
             Body.BodyType = BodyType.Dynamic;
+
+            Parent.PropertyBinder["Position"].SetBinding(this, "Position");
+            Parent.PropertyBinder["Rotation"].SetBinding(this, "Rotation");
         }
 
         protected override void OnUpdate(GameTime gameTime)
@@ -212,12 +222,13 @@ namespace MonoEngine.Components
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {        
+        {
         }
 
         protected override void OnDestroy()
         {
-            App.Instance.Scene.PhysicsWorld.RemoveBody(Body);
+            if (Body != null)
+                App.Instance.Scene.PhysicsWorld.RemoveBody(Body);
         }
     }
 }

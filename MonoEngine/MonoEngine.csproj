@@ -48,8 +48,13 @@
   <ItemGroup>
     <Compile Include="Components\CircleShape.cs" />
     <Compile Include="Components\PhysicsBody.cs" />
+    <Compile Include="Components\PhysicsJoint.cs" />
     <Compile Include="Components\PhysicsShape.cs" />
     <Compile Include="Components\RectangleShape.cs" />
+    <Compile Include="Components\RevoluteJoint.cs" />
+    <Compile Include="Components\TextureRenderer.cs" />
+    <Compile Include="Core\PropertyBinder.cs" />
+    <Compile Include="ResourceManagement\TextureManager.cs" />
     <Compile Include="Core\App.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Core\Debug.cs" />

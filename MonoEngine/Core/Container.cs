@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace MonoEngine.Core
 {
-    public class Container<T> where T : IEntity
+    public class Container<T> : IEnumerable<T> where T : IEntity
     {
         /// <summary>
         /// The list of child IEntities.
@@ -73,14 +74,42 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
+        /// Enumerates safely through each child IEntity.s
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> Enumerate()
+        {
+            foreach (T t in Children.ToList())
+                if (!t.IsDestroyed())
+                    yield return t;
+        }
+
+        /// <summary>
+        /// Gets the enumerator from the specified type.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Enumerate().GetEnumerator();
+        }
+
+        /// <summary>
+        /// Gets a generic enumerator.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        /// <summary>
         /// Updates each child IEntity.
         /// </summary>
         /// <param name="gameTime"></param>
         public virtual void Update(GameTime gameTime)
         {
-            foreach (T t in Children.ToList())
-                if (!t.IsDestroyed())
-                    t.Update(gameTime);
+            foreach (T t in this)
+                t.Update(gameTime);
         }
 
         /// <summary>
@@ -90,9 +119,8 @@ namespace MonoEngine.Core
         /// <param name="gameTime"></param>
         public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            foreach (T t in Children.ToList())
-                if (!t.IsDestroyed())
-                    t.Draw(spriteBatch, gameTime);
+            foreach (T t in this)
+                t.Draw(spriteBatch, gameTime);
         }
 
         /// <summary>
@@ -100,11 +128,8 @@ namespace MonoEngine.Core
         /// </summary>
         public virtual void Destroy()
         {
-            foreach (T t in Children.ToList())
-                if (!t.IsDestroyed())
-                    t.Destroy();
-
-            Children.Clear();
+            foreach (T t in this)
+                t.Destroy();
         }
     }
 }

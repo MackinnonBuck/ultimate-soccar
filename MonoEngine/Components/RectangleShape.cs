@@ -77,7 +77,7 @@ namespace MonoEngine.Components
 
         protected override Fixture CreateFixture()
         {
-            return FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.PhysicsBody.Body);
+            return FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.GetComponent<PhysicsBody>().Body);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

@@ -50,7 +50,9 @@ namespace MonoEngine.Components
 
         protected override void OnInitialize()
         {
-            radius = 1f;
+            TextureRenderer renderer = Parent.GetComponent<TextureRenderer>();
+
+            radius = renderer == null ? 1f : renderer.Radius;
             density = 1f;
 
             base.OnInitialize();
@@ -58,7 +60,7 @@ namespace MonoEngine.Components
 
         protected override Fixture CreateFixture()
         {
-            return FixtureFactory.AttachCircle(Radius, Density, Parent.PhysicsBody.Body);
+            return FixtureFactory.AttachCircle(Radius, Density, Parent.GetComponent<PhysicsBody>().Body);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

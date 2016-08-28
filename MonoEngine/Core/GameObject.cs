@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoEngine.Components;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,14 +17,14 @@ namespace MonoEngine.Core
         bool isDestroyed;
 
         /// <summary>
+        /// Manages rebindable properties of the GameObject.
+        /// </summary>
+        internal PropertyBinder PropertyBinder { get; private set; }
+
+        /// <summary>
         /// The components of this GameObject.
         /// </summary>
         Container<Component> components;
-
-        /// <summary>
-        /// Used to quickly reference the GameObject's PhysicsBody (needed for internal performance).
-        /// </summary>
-        internal PhysicsBody PhysicsBody { get; private set; }
 
         /// <summary>
         /// Called when the GameObject is initialized.
@@ -53,27 +54,17 @@ namespace MonoEngine.Core
         /// </summary>
         public GameObject Parent { get; private set; }
 
-        Vector2 _position;
-
-        /// <summary>
-        /// Stores position of the GameObject.
-        /// </summary>
         public Vector2 Position
         {
             get
             {
-                return PhysicsBody == null ? _position : PhysicsBody.Position;
+                return (Vector2)PropertyBinder["Position"].Value;
             }
             set
             {
-                _position = value;
-
-                if (PhysicsBody != null)
-                    PhysicsBody.Position = value;
+                PropertyBinder["Position"].Value = value;
             }
         }
-
-        float _rotation;
 
         /// <summary>
         /// Stores the rotation in degrees of the GameObject.
@@ -82,32 +73,42 @@ namespace MonoEngine.Core
         {
             get
             {
-                return PhysicsBody == null ? _rotation : PhysicsBody.Body.Rotation;
+                return (float)PropertyBinder["Rotation"].Value;
             }
             set
             {
-                _rotation = value;
-
-                if (PhysicsBody != null)
-                    PhysicsBody.Body.Rotation = value;
+                PropertyBinder["Rotation"].Value = value;
             }
         }
 
         /// <summary>
         /// Stores the scale of the GameObject.
         /// </summary>
-        public Vector2 Scale { get; set; }
+        public Vector2 Scale
+        {
+            get
+            {
+                return (Vector2)PropertyBinder["Scale"].Value;
+            }
+            set
+            {
+                PropertyBinder["Scale"].Value = value;
+            }
+        }
 
         /// <summary>
         /// Creates the GameObject with a parent.
         /// </summary>
         public GameObject(Container<GameObject> parentObject)
         {
+            PropertyBinder = new PropertyBinder();
+
             isDestroyed = false;
 
             components = new Container<Component>();
-            _position = Vector2.Zero;
-            _rotation = 0f;
+            Position = Vector2.Zero;
+            Rotation = 0f;
+            Scale = Vector2.One;
 
             if (parentObject == null)
             {
@@ -158,11 +159,15 @@ namespace MonoEngine.Core
         /// </summary>
         public override void Destroy()
         {
-            components.Destroy();
             base.Destroy();
+            components.Destroy();
 
-            App.Instance.Scene.RemoveChild(this);
             OnDestroy();
+
+            if (Parent == null)
+                App.Instance.Scene.RemoveChild(this);
+            else
+                Parent.RemoveChild(this);
 
             isDestroyed = true;
         }
@@ -186,14 +191,6 @@ namespace MonoEngine.Core
             components.AddChild(component);
             component.Parent = this;
             component.Initialize();
-
-            if (component is PhysicsBody)
-            {
-                if (PhysicsBody == null)
-                    PhysicsBody = component as PhysicsBody;
-                else
-                    Debug.Log("Cannot add more than one PhysicsBody to a GameObject.", Debug.LogSeverity.ERROR);
-            }
 
             return component;
         }

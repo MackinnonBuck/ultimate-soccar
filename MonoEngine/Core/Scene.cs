@@ -4,6 +4,7 @@ using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoEngine.Components;
+using MonoEngine.ResourceManagement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace MonoEngine.Core
         /// <summary>
         /// Called when the Scene is quitting.
         /// </summary>
-        protected abstract void OnQuit();
+        protected abstract void OnDestroy();
 
         /// <summary>
         /// The gravity of the physics world.
@@ -145,7 +146,10 @@ namespace MonoEngine.Core
             PhysicsWorld.Clear();
             debugView.Dispose();
 
-            OnQuit();
+            OnDestroy();
+
+            TextureManager.Instance.Clear();
+            App.Instance.Content.Unload();
         }
 
         /// <summary>

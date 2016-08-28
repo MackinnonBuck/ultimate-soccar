@@ -11,6 +11,7 @@ using FarseerPhysics;
 using FarseerPhysics.Dynamics;
 using MonoEngine.Core;
 using MonoEngine.Components;
+using MonoEngine.ResourceManagement;
 
 namespace UltimateSocCar.Testing
 {
@@ -21,9 +22,11 @@ namespace UltimateSocCar.Testing
         protected override void OnInitialize()
         {
             DebugDrawEnabled = true;
+            TextureManager.Instance.Load("Textures/Pin", "Pin");
+            TextureManager.Instance.Load("Textures/Earth", "Earth");
         }
 
-        protected override void OnQuit()
+        protected override void OnDestroy()
         {
         }
 
@@ -45,7 +48,12 @@ namespace UltimateSocCar.Testing
 
                     if (movingBody == null)
                     {
-                        GameObject newObject = new GameObject(App.Instance.Scene.GetChild<GameObject>());
+                        GameObject parent = GetChild<GameObject>();
+
+                        while (parent != null && parent.GetChild<GameObject>() != null)
+                            parent = parent.GetChild<GameObject>();
+
+                        GameObject newObject = new GameObject(parent);
                         newObject.Position = Mouse.GetState().Position.ToVector2();
                         movingBody = newObject.AddComponent<PhysicsBody>();
 
@@ -53,11 +61,20 @@ namespace UltimateSocCar.Testing
                         {
                             RectangleShape rectangleShape = newObject.AddComponent<RectangleShape>();
                             rectangleShape.Width = rectangleShape.Height = 0.5f;
+                            newObject.AddComponent<TextureRenderer>().TextureID = "Pin";
+                            newObject.Scale = new Vector2(0.2f);
                         }
                         else
                         {
                             CircleShape circleShape = newObject.AddComponent<CircleShape>();
                             circleShape.Radius = 0.5f;
+                            newObject.AddComponent<TextureRenderer>().TextureID = "Earth";
+                            newObject.Scale = new Vector2(0.04f);
+                        }
+
+                        if (newObject.Parent != null)
+                        {
+                            newObject.AddComponent<RevoluteJoint>();
                         }
                     }
 
@@ -82,7 +99,7 @@ namespace UltimateSocCar.Testing
 
                 if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
                 {
-                    PhysicsBody body = App.Instance.Scene.GetBodyAt(Mouse.GetState().Position.ToVector2());
+                    PhysicsBody body = GetBodyAt(Mouse.GetState().Position.ToVector2());
 
                     if (body != null)
                         body.Parent.Destroy();
