@@ -110,7 +110,7 @@ namespace MonoEngine.Core
             Rotation = 0f;
             Scale = Vector2.One;
 
-            if (parentObject == null)
+            if (parentObject == null || !(parentObject is GameObject))
             {
                 App.Instance.Scene.AddChild(this);
             }

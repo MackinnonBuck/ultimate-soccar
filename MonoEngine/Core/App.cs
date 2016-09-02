@@ -108,6 +108,8 @@ namespace MonoEngine.Core
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            Input.Instance.Refresh();
+
             if (futureScene != null)
             {
                 Scene?.Destroy();

@@ -24,6 +24,21 @@ namespace UltimateSocCar.Testing
             DebugDrawEnabled = true;
             TextureManager.Instance.Load("Textures/Pin", "Pin");
             TextureManager.Instance.Load("Textures/Earth", "Earth");
+
+            Input.Instance.OnKeyPressed += OnKeyPressed;
+        }
+
+        private void OnKeyPressed(object sender, Input.KeyboardInputEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Keys.R:
+                    App.Instance.ChangeScene(new TestScene());
+                    break;
+                case Keys.D:
+                    DebugDrawEnabled = !DebugDrawEnabled;
+                    break;
+            }
         }
 
         protected override void OnDestroy()
@@ -32,19 +47,14 @@ namespace UltimateSocCar.Testing
 
         protected override void OnUpdate(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
-                App.Instance.ChangeScene(new TestScene());
+            if (Input.Instance.IsKeyDown(Keys.LeftControl))
+                Camera.Position -= Input.Instance.MouseSpeed;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.E))
-                DebugDrawEnabled = true;
-            else if (Keyboard.GetState().IsKeyDown(Keys.D))
-                DebugDrawEnabled = false;
-
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed || Mouse.GetState().RightButton == ButtonState.Pressed)
+            if (Input.Instance.IsMouseButtonDown(Input.MouseButtons.LEFT) || Input.Instance.IsMouseButtonDown(Input.MouseButtons.RIGHT))
             {
                 if (movingBody == null)
                 {
-                    movingBody = GetBodyAt(Mouse.GetState().Position.ToVector2());
+                    movingBody = GetBodyAt(Input.Instance.SceneMousePosition);
 
                     if (movingBody == null)
                     {
@@ -54,10 +64,10 @@ namespace UltimateSocCar.Testing
                             parent = parent.GetChild<GameObject>();
 
                         GameObject newObject = new GameObject(parent);
-                        newObject.Position = Mouse.GetState().Position.ToVector2();
+                        newObject.Position = Input.Instance.SceneMousePosition;
                         movingBody = newObject.AddComponent<PhysicsBody>();
 
-                        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+                        if (Input.Instance.IsMouseButtonDown(Input.MouseButtons.LEFT))
                         {
                             RectangleShape rectangleShape = newObject.AddComponent<RectangleShape>();
                             rectangleShape.Width = rectangleShape.Height = 0.5f;
@@ -83,7 +93,7 @@ namespace UltimateSocCar.Testing
                     movingBody.LinearDamping = movingBody.AngularDamping = 25f;
                 }
 
-                movingBody.ApplyForce((Mouse.GetState().Position.ToVector2() - movingBody.Position) * 25f);
+                movingBody.ApplyForce((Input.Instance.SceneMousePosition - movingBody.Position) * 25f);
             }
             else
             {
@@ -97,26 +107,25 @@ namespace UltimateSocCar.Testing
                     movingBody = null;
                 }
 
-                if (Mouse.GetState().MiddleButton == ButtonState.Pressed)
+                if (Input.Instance.IsMouseButtonDown(Input.MouseButtons.MIDDLE))
                 {
-                    PhysicsBody body = GetBodyAt(Mouse.GetState().Position.ToVector2());
+                    PhysicsBody body = GetBodyAt(Input.Instance.SceneMousePosition);
 
                     if (body != null)
                         body.Parent.Destroy();
                 }
             }
+
+            Camera.Scale *= 1 + Input.Instance.WheelSpeed * 0.00025f;
         }
 
         protected override void OnPreDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             App.Instance.GraphicsDevice.Clear(Color.Black);
-
-            spriteBatch.Begin();
         }
 
         protected override void OnPostDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.End();
         }
     }
 }

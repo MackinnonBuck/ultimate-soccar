@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public abstract class Scene : Container<GameObject>
+    public abstract class Scene : Container<IEntity>
     {
         /// <summary>
         /// The physics world of the scene.
@@ -86,6 +86,11 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
+        /// Gets the Camera associated with the scene.
+        /// </summary>
+        public Camera Camera { get; private set; }
+
+        /// <summary>
         /// Creates a new Scene instance.
         /// </summary>
         public Scene()
@@ -106,6 +111,8 @@ namespace MonoEngine.Core
             debugView.AppendFlags(DebugViewFlags.ContactNormals);
             debugView.LoadContent(App.Instance.GraphicsDevice, App.Instance.Content);
             debugView.Enabled = false;
+
+            AddChild(Camera = new Camera());
 
             OnInitialize();
         }
@@ -129,12 +136,19 @@ namespace MonoEngine.Core
         /// <param name="gameTime"></param>
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
+            spriteBatch.Begin(transformMatrix: Camera.ViewMatrix);
+
             OnPreDraw(spriteBatch, gameTime);
             base.Draw(spriteBatch, gameTime);
             OnPostDraw(spriteBatch, gameTime);
 
-            Matrix proj = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Width), ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Height), 0f, 0f, 1f);
-            debugView.RenderDebugData(ref proj);
+            spriteBatch.End();
+            
+            if (DebugDrawEnabled)
+            {
+                Matrix proj = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Width), ConvertUnits.ToSimUnits(App.Instance.GraphicsDevice.Viewport.Height), 0f, 0f, 1f);
+                debugView.RenderDebugData(proj, Camera.SimViewMatrix);
+            }
         }
 
         /// <summary>

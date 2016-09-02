@@ -52,7 +52,7 @@ namespace MonoEngine.Components
         {
             TextureRenderer renderer = Parent.GetComponent<TextureRenderer>();
 
-            radius = renderer == null ? 1f : renderer.Radius;
+            radius = 1f;
             density = 1f;
 
             base.OnInitialize();

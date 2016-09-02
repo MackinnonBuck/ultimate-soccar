@@ -53,6 +53,8 @@
     <Compile Include="Components\RectangleShape.cs" />
     <Compile Include="Components\RevoluteJoint.cs" />
     <Compile Include="Components\TextureRenderer.cs" />
+    <Compile Include="Core\Camera.cs" />
+    <Compile Include="Core\Input.cs" />
     <Compile Include="Core\PropertyBinder.cs" />
     <Compile Include="ResourceManagement\TextureManager.cs" />
     <Compile Include="Core\App.cs" />
