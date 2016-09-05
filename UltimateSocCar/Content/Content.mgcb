@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\MonoEngine\bin\Debug\MonoEngine.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -36,4 +37,21 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/Pin.png
+
+#begin map.tmx
+/importer:MapImporter
+/processor:MapProcessor
+/build:map.tmx
+
+#begin Textures/blocks1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/blocks1.png
 

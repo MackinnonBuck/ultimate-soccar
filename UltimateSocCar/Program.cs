@@ -28,7 +28,7 @@ namespace UltimateSocCar
 #if DEBUG
             AllocConsole();
 #endif
-            App.Instance.Init("Ultimate SocCar", 1280, 720, new TestScene());
+            App.Instance.Init("Ultimate SocCar", 1280, 720, new Scene("map")/*TestScene()*/);
             App.Instance.Run();
         }
     }

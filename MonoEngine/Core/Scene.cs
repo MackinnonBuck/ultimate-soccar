@@ -4,7 +4,9 @@ using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoEngine.Components;
+using MonoEngine.Extensions;
 using MonoEngine.ResourceManagement;
+using MonoEngine.TMX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +15,13 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public abstract class Scene : Container<IEntity>
+    public class Scene : Container<IEntity>
     {
+        /// <summary>
+        /// The path associated with the .tmx file to be loaded.
+        /// </summary>
+        private string tmxPath;
+
         /// <summary>
         /// The physics world of the scene.
         /// </summary>
@@ -26,34 +33,39 @@ namespace MonoEngine.Core
         DebugViewXNA debugView;
 
         /// <summary>
+        /// Called when the scene is loaded from a .tmx file.
+        /// </summary>
+        protected virtual void OnLoad(Map map) { }
+
+        /// <summary>
         /// Called when the Scene is initialized.
         /// </summary>
-        protected abstract void OnInitialize();
+        protected virtual void OnInitialize() { }
 
         /// <summary>
         /// Called when the Scene is updated.
         /// </summary>
         /// <param name="gameTime"></param>
-        protected abstract void OnUpdate(GameTime gameTime);
+        protected virtual void OnUpdate(GameTime gameTime) { }
 
         /// <summary>
         /// Called before the Scene is drawn.
         /// </summary>
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
-        protected abstract void OnPreDraw(SpriteBatch spriteBatch, GameTime gameTime);
+        protected virtual void OnPreDraw(SpriteBatch spriteBatch, GameTime gameTime) { }
 
         /// <summary>
         /// Called after the Scene is drawn.
         /// </summary>
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
-        protected abstract void OnPostDraw(SpriteBatch spriteBatch, GameTime gameTime);
+        protected virtual void OnPostDraw(SpriteBatch spriteBatch, GameTime gameTime) {  }
 
         /// <summary>
         /// Called when the Scene is quitting.
         /// </summary>
-        protected abstract void OnDestroy();
+        protected virtual void OnDestroy() { }
 
         /// <summary>
         /// The gravity of the physics world.
@@ -93,8 +105,29 @@ namespace MonoEngine.Core
         /// <summary>
         /// Creates a new Scene instance.
         /// </summary>
-        public Scene()
+        public Scene(string mapPath = null)
         {
+            tmxPath = mapPath;
+        }
+
+        /// <summary>
+        /// Loads the given Map into the scene.
+        /// </summary>
+        /// <param name="map"></param>
+        private void Load(Map map)
+        {
+            foreach (KeyValuePair<string, string> property in map.Properties)
+            {
+                switch (property.Key)
+                {
+                    case "gravity":
+                        if (!Gravity.TryParse(property.Value))
+                            Debug.Log("Could not correctly parse the \"gravity\" property.", Debug.LogSeverity.WARNING);
+                        break;
+                }
+            }
+
+            OnLoad(map);
         }
 
         /// <summary>
@@ -113,6 +146,9 @@ namespace MonoEngine.Core
             debugView.Enabled = false;
 
             AddChild(Camera = new Camera());
+
+            if (tmxPath != null)
+                Load(App.Instance.Content.Load<Map>(tmxPath));
 
             OnInitialize();
         }
