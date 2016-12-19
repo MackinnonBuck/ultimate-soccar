@@ -76,5 +76,29 @@ namespace MonoEngine.ResourceManagement
 
             return null;
         }
+
+        /// <summary>
+        /// Draws an loaded texture.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="id"></param>
+        /// <param name="position"></param>
+        /// <param name="sourceRectangle"></param>
+        /// <param name="color"></param>
+        /// <param name="rotation"></param>
+        /// <param name="origin"></param>
+        /// <param name="scale"></param>
+        /// <param name="effects"></param>
+        /// <param name="layerDepth"></param>
+        public void Draw(SpriteBatch spriteBatch, string id, Vector2 position, Rectangle? sourceRectangle, Color color,
+            float rotation, Vector2? origin, Vector2 scale, SpriteEffects effects, float layerDepth)
+        {
+            if (textures.ContainsKey(id))
+            {
+                Texture2D texture = textures[id];
+                Vector2 textureOrigin = origin ?? new Vector2(texture.Width / 2, texture.Height / 2);
+                spriteBatch.Draw(texture, position, sourceRectangle, color, rotation, textureOrigin, scale, effects, layerDepth);
+            }            
+        }
     }
 }

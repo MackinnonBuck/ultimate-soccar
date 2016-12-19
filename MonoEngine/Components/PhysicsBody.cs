@@ -209,7 +209,7 @@ namespace MonoEngine.Components
                 return;
             }
             
-            Body = BodyFactory.CreateBody(App.Instance.Scene.PhysicsWorld, ConvertUnits.ToSimUnits(Parent.Position.X, Parent.Position.Y), Parent.Rotation);
+            Body = BodyFactory.CreateBody(App.Instance.ActiveScene.PhysicsWorld, ConvertUnits.ToSimUnits(Parent.Position.X, Parent.Position.Y), Parent.Rotation);
             Body.UserData = this;
             Body.BodyType = BodyType.Dynamic;
 
@@ -228,7 +228,7 @@ namespace MonoEngine.Components
         protected override void OnDestroy()
         {
             if (Body != null)
-                App.Instance.Scene.PhysicsWorld.RemoveBody(Body);
+                App.Instance.ActiveScene.PhysicsWorld.RemoveBody(Body);
         }
     }
 }

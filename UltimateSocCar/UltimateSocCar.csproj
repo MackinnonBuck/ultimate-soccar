@@ -44,7 +44,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Testing\TestComponent.cs" />
-    <Compile Include="Testing\TestObject.cs" />
     <Compile Include="Testing\TestScene.cs" />
   </ItemGroup>
   <ItemGroup>

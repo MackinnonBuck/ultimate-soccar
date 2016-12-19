@@ -18,7 +18,7 @@ namespace MonoEngine.Core
         /// <summary>
         /// The Game's active Scene.
         /// </summary>
-        public Scene Scene { get; private set; }
+        public Scene ActiveScene { get; private set; }
 
         Scene futureScene;
 
@@ -112,15 +112,15 @@ namespace MonoEngine.Core
 
             if (futureScene != null)
             {
-                Scene?.Destroy();
+                ActiveScene?.Destroy();
 
-                Scene = futureScene;
+                ActiveScene = futureScene;
                 futureScene = null;
 
-                Scene.Initialize();
+                ActiveScene.Initialize();
             }
             
-            Scene.Update(gameTime);
+            ActiveScene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -131,7 +131,7 @@ namespace MonoEngine.Core
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            Scene.Draw(spriteBatch, gameTime);
+            ActiveScene.Draw(spriteBatch, gameTime);
 
             base.Draw(gameTime);
         }

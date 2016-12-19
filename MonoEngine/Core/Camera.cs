@@ -9,10 +9,8 @@ using FarseerPhysics;
 
 namespace MonoEngine.Core
 {
-    public class Camera : IEntity
+    public class Camera : Entity
     {
-        bool destroyed;
-
         public Viewport Viewport
         {
             get
@@ -52,32 +50,33 @@ namespace MonoEngine.Core
             }
         }
 
-        public Camera()
+        private Camera()
         {
-            destroyed = false;
+        }
 
+        public static Camera Create()
+        {
+            return App.Instance.ActiveScene.Children.Add(new Camera());
+        }
+
+        public override void Initialize()
+        {
             Origin = new Vector2(Viewport.Width * 0.5f, Viewport.Height * 0.5f);
             Position = Vector2.Zero;
             Rotation = 0f;
             Scale = Vector2.One;
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
         }
 
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
         }
 
-        public void Destroy()
+        protected override void OnDestroy()
         {
-            destroyed = true;
-        }
-
-        public bool IsDestroyed()
-        {
-            return destroyed;
         }
     }
 }

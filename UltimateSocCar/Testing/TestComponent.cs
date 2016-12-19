@@ -17,6 +17,10 @@ namespace UltimateSocCar.Testing
 
         Texture2D rect;
 
+        public TestComponent()
+        {
+        }
+
         protected override void OnInitialize()
         {
             rect = new Texture2D(App.Instance.GraphicsDevice, WIDTH, HEIGHT);
@@ -37,7 +41,7 @@ namespace UltimateSocCar.Testing
         }
 
         protected override void OnDestroy()
-        {           
+        {
         }
     }
 }

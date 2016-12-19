@@ -12,19 +12,22 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public class GameObject : Container<GameObject>, IEntity
+    public class GameObject : Entity
     {
-        bool isDestroyed;
-
         /// <summary>
         /// Manages rebindable properties of the GameObject.
         /// </summary>
         internal PropertyBinder PropertyBinder { get; private set; }
 
         /// <summary>
+        /// The GameObject children of this GameObject.
+        /// </summary>
+        private Container<GameObject> children;
+
+        /// <summary>
         /// The components of this GameObject.
         /// </summary>
-        Container<Component> components;
+        private Container<Component> components;
 
         /// <summary>
         /// Called when the GameObject is initialized.
@@ -43,11 +46,6 @@ namespace MonoEngine.Core
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
         protected virtual void OnDraw(SpriteBatch spriteBatch, GameTime gameTime) { }
-
-        /// <summary>
-        /// Called when the GameObject is destroyed.
-        /// </summary>
-        protected virtual void OnDestroy() { }
 
         /// <summary>
         /// The parent of this GameObject.
@@ -99,35 +97,104 @@ namespace MonoEngine.Core
         /// <summary>
         /// Creates the GameObject with a parent.
         /// </summary>
-        public GameObject(Container<GameObject> parentObject)
+        private GameObject(GameObject parent)
         {
-            PropertyBinder = new PropertyBinder();
-
-            isDestroyed = false;
-
-            components = new Container<Component>();
-            Position = Vector2.Zero;
-            Rotation = 0f;
-            Scale = Vector2.One;
-
-            if (parentObject == null || !(parentObject is GameObject))
-            {
-                App.Instance.Scene.AddChild(this);
-            }
-            else
-            {
-                Parent = (GameObject)parentObject;
-                parentObject.AddChild(this);
-            }
-
-            OnInitialize();
+            Parent = parent;
         }
 
         /// <summary>
         /// Creates the GameObject without a parent.
         /// </summary>
-        public GameObject() : this(null)
+        private GameObject() : this(null)
         {
+        }
+
+        /// <summary>
+        /// Used for creating an instance of GameObject with the given parent.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        public static GameObject Create(GameObject parent)
+        {
+            return parent == null ? App.Instance.ActiveScene.Children.Add(new GameObject())
+                : parent.children.Add(new GameObject(parent));
+        }
+
+        /// <summary>
+        /// Used for creating an instance of GameObjet without a parent.
+        /// </summary>
+        /// <returns></returns>
+        public static GameObject Create()
+        {
+            return Create(null);
+        }
+
+        /// <summary>
+        /// Returns all GameObject children of the given parent.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        public static List<GameObject> GetAll(GameObject parent = null)
+        {
+            return parent == null ? App.Instance.ActiveScene.Children.GetAll<GameObject>() : parent.children.GetAll<GameObject>();
+        }
+
+        /// <summary>
+        /// Returns the first child GameObject of the given parent.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        public static GameObject Get(GameObject parent = null)
+        {
+            return parent == null ? App.Instance.ActiveScene.Children.Get<GameObject>() : parent.children.Get<GameObject>();
+        }
+
+        /// <summary>
+        /// Adds a component of the given type to the GameObject.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddComponent<T>() where T : Component, new()
+        {
+            T component = Component.Create<T>(this);
+            components.Add(component);
+            return component;
+        }
+
+        /// <summary>
+        /// Returns all components of the given type associated with the GameObject.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> GetComponents<T>() where T : Component
+        {
+            return components.GetAll<T>();
+        }
+
+        /// <summary>
+        /// Returns the first component of the given type associated with the GameObject.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetComponent<T>() where T : Component
+        {
+            return components.Get<T>();
+        }
+
+        /// <summary>
+        /// Initializes the GameObject.
+        /// </summary>
+        public override void Initialize()
+        {
+            PropertyBinder = new PropertyBinder();
+
+            components = new Container<Component>();
+            children = new Container<GameObject>();
+            Position = Vector2.Zero;
+            Rotation = 0f;
+            Scale = Vector2.One;
+
+            OnInitialize();
         }
 
         /// <summary>
@@ -137,7 +204,7 @@ namespace MonoEngine.Core
         public override void Update(GameTime gameTime)
         {
             components.Update(gameTime);
-            base.Update(gameTime);
+            children.Update(gameTime);
 
             OnUpdate(gameTime);
         }
@@ -150,83 +217,22 @@ namespace MonoEngine.Core
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             components.Draw(spriteBatch, gameTime);
-            base.Draw(spriteBatch, gameTime);
+            children.Draw(spriteBatch, gameTime);
             OnDraw(spriteBatch, gameTime);
         }
 
         /// <summary>
         /// Destroys the GameObject.
         /// </summary>
-        public override void Destroy()
+        protected override void OnDestroy()
         {
-            base.Destroy();
+            children.Destroy();
             components.Destroy();
 
-            OnDestroy();
-
             if (Parent == null)
-                App.Instance.Scene.RemoveChild(this);
+                App.Instance.ActiveScene.Children.Remove(this);
             else
-                Parent.RemoveChild(this);
-
-            isDestroyed = true;
-        }
-
-        /// <summary>
-        /// Used for determining if the GameObject has been destroyed.
-        /// </summary>
-        /// <returns></returns>
-        bool IEntity.IsDestroyed()
-        {
-            return isDestroyed;
-        }
-
-        /// <summary>
-        /// Adds a Component to the GameObject.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public T AddComponent<T>() where T : Component, new()
-        {
-            T component = new T();
-            components.AddChild(component);
-            component.Parent = this;
-            component.Initialize();
-
-            return component;
-        }
-
-        /// <summary>
-        /// Gets all Components of the given type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public List<T> GetComponents<T>() where T : Component
-        {
-            return components.GetChildren<T>();
-        }
-
-        /// <summary>
-        /// Gets the first Component of the given type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T GetComponent<T>() where T : Component
-        {
-            List<T> components = GetComponents<T>();
-
-            if (components.Count > 0)
-                return components[0];
-
-            return null;
-        }
-
-        /// <summary>
-        /// Removes the component from this GameObject.
-        /// </summary>
-        /// <param name="component"></param>
-        internal void RemoveComponent(Component component)
-        {
-            components.RemoveChild(component);
+                Parent.children.Remove(this);
         }
     }
 }

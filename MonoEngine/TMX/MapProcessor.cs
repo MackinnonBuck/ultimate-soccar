@@ -42,6 +42,12 @@ namespace MonoEngine.TMX
             {
                 switch (name)
                 {
+                    case "map":
+                        map.Width = int.Parse(input["width"]);
+                        map.Height = int.Parse(input["height"]);
+                        map.TileWidth = int.Parse(input["tilewidth"]);
+                        map.TileHeight = int.Parse(input["tileheight"]);
+                        break;
                     case "properties":
                         ProcessProperties(input.ReadSubtree(), map);
                         break;
@@ -105,7 +111,10 @@ namespace MonoEngine.TMX
                         tileset.Columns = int.Parse(reader["columns"]);
                         break;
                     case "image":
-                        ProcessImage(reader.ReadSubtree(), tileset);
+                        string imageSource = reader["source"];
+                        tileset.ImageSource = imageSource.Substring(0, imageSource.IndexOf('.'));
+                        tileset.ImageWidth = int.Parse(reader["width"]);
+                        tileset.ImageHeight = int.Parse(reader["height"]);
                         break;
                     case "properties":
                         ProcessProperties(reader.ReadSubtree(), tileset);
@@ -114,27 +123,6 @@ namespace MonoEngine.TMX
             }
 
             map.Tilesets.Add(tileset);
-        }
-
-        /// <summary>
-        /// Processes an image from the given XmlReader.
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="tileset"></param>
-        private void ProcessImage(XmlReader reader, Tileset tileset)
-        {
-            foreach (string name in AllElements(reader))
-            {
-                switch (name)
-                {
-                    case "image":
-                        string imageSource = reader["source"];
-                        tileset.ImageSource = imageSource.Substring(0, imageSource.IndexOf('.'));
-                        tileset.ImageWidth = int.Parse(reader["width"]);
-                        tileset.ImageHeight = int.Parse(reader["height"]);
-                        break;
-                }
-            }
         }
 
         /// <summary>

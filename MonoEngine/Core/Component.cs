@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoEngine.Components;
+using MonoEngine.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +10,8 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public abstract class Component : IEntity
+    public abstract class Component : Entity
     {
-        bool isDestroyed;
-
         /// <summary>
         /// Called when the Component is initialized.
         /// </summary>
@@ -28,37 +28,29 @@ namespace MonoEngine.Core
         protected abstract void OnDraw(SpriteBatch spriteBatch, GameTime gameTime);
 
         /// <summary>
-        /// Called when the Component is destroyed.
+        /// The Parent GameObject.
         /// </summary>
-        protected abstract void OnDestroy();
-
-        GameObject _parent;
+        public GameObject Parent { get; private set; }
 
         /// <summary>
-        /// The parent GameObject.
+        /// Creates a new instance of the given component.
+        /// This method must be used to create components instead of calling the component's constructor.
         /// </summary>
-        public GameObject Parent
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        internal static T Create<T>(GameObject parent) where T : Component, new()
         {
-            get
-            {
-                return _parent;
-            }
-            internal set
-            {
-                if (_parent == null)
-                    _parent = value;
-                else
-                    Debug.Log("Cannot change a component's parent after creation.", Debug.LogSeverity.ERROR);
-            }
+            T component = new T();
+            component.Parent = parent;
+            return component;
         }
 
         /// <summary>
         /// Initializes the Component.
         /// </summary>
-        public void Initialize()
+        public override void Initialize()
         {
-            isDestroyed = false;
-
             OnInitialize();
         }
 
@@ -66,7 +58,7 @@ namespace MonoEngine.Core
         /// Updates the Component.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             OnUpdate(gameTime);
         }
@@ -76,25 +68,13 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="spriteBatch"></param>
         /// <param name="gameTime"></param>
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             OnDraw(spriteBatch, gameTime);
         }
 
-        /// <summary>
-        /// Destroys the Component.
-        /// </summary>
-        public void Destroy()
+        protected override void OnDestroy()
         {
-            Parent.RemoveComponent(this);
-            OnDestroy();
-
-            isDestroyed = true;
-        }
-
-        bool IEntity.IsDestroyed()
-        {
-            return isDestroyed;
         }
     }
 }

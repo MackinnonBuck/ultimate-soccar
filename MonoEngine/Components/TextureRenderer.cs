@@ -12,39 +12,7 @@ namespace MonoEngine.Components
 {
     public class TextureRenderer : Component
     {
-        string _textureID;
-
-        /// <summary>
-        /// The ID of the associated Texture2D.
-        /// </summary>
-        public string TextureID
-        {
-            get
-            {
-                return _textureID;
-            }
-            set
-            {
-                _textureID = value;
-                Texture = TextureManager.Instance.GetTexture(value);
-            }
-        }
-
-        /// <summary>
-        /// The texture associated with the TextureRenderer.
-        /// </summary>
-        public Texture2D Texture { get; private set; }
-
-        /// <summary>
-        /// Gets the radius of the texture.
-        /// </summary>
-        public float Radius
-        {
-            get
-            {
-                return (float)Math.Sqrt(Texture.Width * Texture.Width + Texture.Height * Texture.Height);
-            }
-        }
+        public string TextureID { get; set; }
 
         protected override void OnInitialize()
         {
@@ -56,8 +24,8 @@ namespace MonoEngine.Components
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (Texture != null)
-                spriteBatch.Draw(Texture, Parent.Position, null, Color.White, Parent.Rotation, new Vector2(Texture.Width / 2, Texture.Height / 2), Parent.Scale, SpriteEffects.None, 1);
+            if (TextureID != null)
+                TextureManager.Instance.Draw(spriteBatch, TextureID, Parent.Position, null, Color.White, Parent.Rotation, null, Parent.Scale, SpriteEffects.None, 1);
         }
 
         protected override void OnDestroy()

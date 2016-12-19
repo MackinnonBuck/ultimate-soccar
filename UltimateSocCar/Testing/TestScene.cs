@@ -18,6 +18,13 @@ namespace UltimateSocCar.Testing
     public class TestScene : Scene
     {
         PhysicsBody movingBody;
+        string map;
+
+        public TestScene(string mapPath)
+            : base(mapPath)
+        {
+            map = mapPath;
+        }
 
         protected override void OnInitialize()
         {
@@ -33,7 +40,7 @@ namespace UltimateSocCar.Testing
             switch (e.Key)
             {
                 case Keys.R:
-                    App.Instance.ChangeScene(new TestScene());
+                    App.Instance.ChangeScene(new TestScene(map));
                     break;
                 case Keys.D:
                     DebugDrawEnabled = !DebugDrawEnabled;
@@ -58,12 +65,12 @@ namespace UltimateSocCar.Testing
 
                     if (movingBody == null)
                     {
-                        GameObject parent = GetChild<GameObject>();
+                        GameObject parent = GameObject.Get();
 
-                        while (parent != null && parent.GetChild<GameObject>() != null)
-                            parent = parent.GetChild<GameObject>();
+                        while (parent != null && GameObject.Get(parent) != null)
+                            parent = GameObject.Get(parent);
 
-                        GameObject newObject = new GameObject(parent);
+                        GameObject newObject = GameObject.Create(parent);
                         newObject.Position = Input.Instance.SceneMousePosition;
                         movingBody = newObject.AddComponent<PhysicsBody>();
 

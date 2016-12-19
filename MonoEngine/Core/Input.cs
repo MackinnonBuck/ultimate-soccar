@@ -79,7 +79,7 @@ namespace MonoEngine.Core
         {
             get
             {
-                return Vector2.Transform(MousePosition, Matrix.Invert(App.Instance.Scene.Camera.ViewMatrix));
+                return Vector2.Transform(MousePosition, Matrix.Invert(App.Instance.ActiveScene.Camera.ViewMatrix));
             }
         }
 

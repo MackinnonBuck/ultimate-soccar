@@ -9,15 +9,15 @@ using System.Collections;
 
 namespace MonoEngine.Core
 {
-    public class Container<T> : IEnumerable<T> where T : IEntity
+    public class Container<T> : IEnumerable<T> where T : Entity
     {
         /// <summary>
-        /// The list of child IEntities.
+        /// The list of child Entities.
         /// </summary>
         protected List<T> Children { get; private set; }
 
         /// <summary>
-        /// Initializes a new IEntity.
+        /// Initializes a new Entity.
         /// </summary>
         public Container()
         {
@@ -25,47 +25,47 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Finds and returns each IEntity of the given type.
+        /// Finds and returns each Entity of the given type.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>each GameObject of the given type.</returns>
-        public List<U> GetChildren<U>() where U : T
+        public List<U> GetAll<U>() where U : T
         {
             return Children.OfType<U>().ToList();
         }
 
         /// <summary>
-        /// Finds and returns the first found IEntity of the given type.
+        /// Finds and returns the first found Entity of the given type.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>the first found GameObject of the given type.</returns>
-        public U GetChild<U>() where U : T
+        public U Get<U>() where U : T
         {
-            List<U> objects = GetChildren<U>();
+            List<U> objects = GetAll<U>();
 
             if (objects.Count > 0)
                 return objects[0];
 
-            return default(U);
+            return null;
         }
 
         /// <summary>
-        /// Adds an IEntity to the Scene.
+        /// Adds the given entity to the list of children.
         /// </summary>
         /// <param name="entity"></param>
-        internal void AddChild(T entity)
+        public U Add<U>(U entity) where U : T
         {
-            if (Children.Contains(entity))
-                return;
-
             Children.Add(entity);
+            entity.Initialize();
+
+            return entity;
         }
 
         /// <summary>
-        /// Removes an IEntity from the Scene.
+        /// Removes an Entity from the Container.
         /// </summary>
         /// <param name="entity"></param>
-        internal void RemoveChild(T entity)
+        internal void Remove(T entity)
         {
             if (!Children.Contains(entity))
                 return;
@@ -74,13 +74,13 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Enumerates safely through each child IEntity.s
+        /// Enumerates safely through each child Entity.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<T> Enumerate()
         {
             foreach (T t in Children.ToList())
-                if (!t.IsDestroyed())
+                if (!t.Destroyed)
                     yield return t;
         }
 
@@ -103,7 +103,7 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Updates each child IEntity.
+        /// Updates each child Entity.
         /// </summary>
         /// <param name="gameTime"></param>
         public virtual void Update(GameTime gameTime)
@@ -113,7 +113,7 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Draws each child GameObject.
+        /// Draws each child Entity.
         /// </summary>
         /// <param name="spriteBatch"></param>
         /// <param name="gameTime"></param>
@@ -124,7 +124,7 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// Destroys each child GameObject.
+        /// Destroys each child Entity.
         /// </summary>
         public virtual void Destroy()
         {

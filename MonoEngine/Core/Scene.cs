@@ -15,12 +15,17 @@ using System.Threading.Tasks;
 
 namespace MonoEngine.Core
 {
-    public class Scene : Container<IEntity>
+    public class Scene
     {
         /// <summary>
         /// The path associated with the .tmx file to be loaded.
         /// </summary>
         private string tmxPath;
+
+        /// <summary>
+        /// The container for all of the scene's child entities.
+        /// </summary>
+        internal Container<Entity> Children { get; private set; }
 
         /// <summary>
         /// The physics world of the scene.
@@ -127,6 +132,17 @@ namespace MonoEngine.Core
                 }
             }
 
+            foreach (Tileset tileset in map.Tilesets)
+            {
+                TextureManager.Instance.Load(tileset.ImageSource, tileset.ImageSource);
+            }
+
+            for (int i = 0; i < map.Layers.Count; i++)
+            {
+                if (map.Layers[i] is TileLayer)
+                    Children.Add(new TileLayerObject(map, i));//Children.AddIndependent<TileLayerObject>(map, i);
+            }
+            
             OnLoad(map);
         }
 
@@ -145,7 +161,8 @@ namespace MonoEngine.Core
             debugView.LoadContent(App.Instance.GraphicsDevice, App.Instance.Content);
             debugView.Enabled = false;
 
-            AddChild(Camera = new Camera());
+            Children = new Container<Entity>();
+            Camera = Camera.Create();
 
             if (tmxPath != null)
                 Load(App.Instance.Content.Load<Map>(tmxPath));
@@ -157,11 +174,11 @@ namespace MonoEngine.Core
         /// Updates the Scene.
         /// </summary>
         /// <param name="gameTime"></param>
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             PhysicsWorld.Step(App.Instance.TargetElapsedTime.Milliseconds * 0.001f);
 
-            base.Update(gameTime);
+            Children.Update(gameTime);
             OnUpdate(gameTime);
         }
 
@@ -170,12 +187,12 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="graphicsDevice"></param>
         /// <param name="gameTime"></param>
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Begin(transformMatrix: Camera.ViewMatrix);
+            spriteBatch.Begin(transformMatrix: Camera.ViewMatrix, samplerState: SamplerState.PointClamp);
 
             OnPreDraw(spriteBatch, gameTime);
-            base.Draw(spriteBatch, gameTime);
+            Children.Draw(spriteBatch, gameTime);
             OnPostDraw(spriteBatch, gameTime);
 
             spriteBatch.End();
@@ -190,9 +207,9 @@ namespace MonoEngine.Core
         /// <summary>
         /// Quits the Scene.
         /// </summary>
-        public override void Destroy()
+        public void Destroy()
         {
-            base.Destroy();
+            Children.Destroy();
             PhysicsWorld.Clear();
             debugView.Dispose();
 

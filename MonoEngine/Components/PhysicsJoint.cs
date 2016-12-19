@@ -65,7 +65,7 @@ namespace MonoEngine.Components
         protected override void OnDestroy()
         {
             if (joint != null)
-                App.Instance.Scene.PhysicsWorld.RemoveJoint(joint);
+                App.Instance.ActiveScene.PhysicsWorld.RemoveJoint(joint);
         }
     }
 }

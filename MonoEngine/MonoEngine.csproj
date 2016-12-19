@@ -76,13 +76,13 @@
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\PropertyBinder.cs" />
-    <Compile Include="Core\TMXLoader.cs" />
+    <Compile Include="Core\TileLayerObject.cs" />
     <Compile Include="Extensions\Parsing.cs" />
     <Compile Include="ResourceManagement\TextureManager.cs" />
     <Compile Include="Core\App.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Core\Debug.cs" />
-    <Compile Include="Core\IEntity.cs" />
+    <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\GameObject.cs" />
     <Compile Include="Core\Container.cs" />
     <Compile Include="Core\Scene.cs" />
