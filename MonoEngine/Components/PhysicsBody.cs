@@ -51,9 +51,9 @@ namespace MonoEngine.Components
         }
 
         /// <summary>
-        /// The position of the PhysicsBody.
+        /// The position of the PhysicsBody in pixels.
         /// </summary>
-        public Vector2 Position
+        public Vector2 DisplayPosition
         {
             get
             {
@@ -62,6 +62,22 @@ namespace MonoEngine.Components
             set
             {
                 Body.Position = ConvertUnits.ToSimUnits(value);
+                Body.Awake = true;
+            }
+        }
+
+        /// <summary>
+        /// The position of the PhysicsBody.
+        /// </summary>
+        public Vector2 Position
+        {
+            get
+            {
+                return Body.Position;
+            }
+            set
+            {
+                Body.Position = value;
                 Body.Awake = true;
             }
         }
@@ -200,6 +216,9 @@ namespace MonoEngine.Components
             Body.ApplyAngularImpulse(impulse);
         }
 
+        /// <summary>
+        /// Initializes the PhysicsBody.
+        /// </summary>
         protected override void OnInitialize()
         {
             if (Parent.GetComponents<PhysicsBody>().Count > 1)
@@ -213,7 +232,7 @@ namespace MonoEngine.Components
             Body.UserData = this;
             Body.BodyType = BodyType.Dynamic;
 
-            Parent.PropertyBinder["Position"].SetBinding(this, "Position");
+            Parent.PropertyBinder["Position"].SetBinding(this, "DisplayPosition");
             Parent.PropertyBinder["Rotation"].SetBinding(this, "Rotation");
         }
 
@@ -225,6 +244,9 @@ namespace MonoEngine.Components
         {
         }
 
+        /// <summary>
+        /// Removes the PhysicsBody from the scene.
+        /// </summary>
         protected override void OnDestroy()
         {
             if (Body != null)

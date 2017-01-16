@@ -1,4 +1,5 @@
 ﻿using MonoEngine.Core;
+using MonoEngine.TMX;
 using System;
 using System.Runtime.InteropServices;
 using UltimateSocCar.Testing;
@@ -28,6 +29,10 @@ namespace UltimateSocCar
 #if DEBUG
             AllocConsole();
 #endif
+            // Register GameObjectDefinitions for .tmx map loading.
+            GameObjectFactory.Instance.RegisterDefinition<TestDefinition>();
+
+            // Run the game.
             App.Instance.Init("Ultimate SocCar", 1280, 720, new TestScene("map")/*TestScene()*/);
             App.Instance.Run();
         }

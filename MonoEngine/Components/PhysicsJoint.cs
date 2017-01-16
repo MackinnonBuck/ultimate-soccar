@@ -62,6 +62,9 @@ namespace MonoEngine.Components
             joint = CreateJoint();
         }
 
+        /// <summary>
+        /// Removes the PhysicsJoint from the scene.
+        /// </summary>
         protected override void OnDestroy()
         {
             if (joint != null)

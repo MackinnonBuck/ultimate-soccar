@@ -48,19 +48,19 @@ namespace MonoEngine.Components
             }
         }
 
+        /// <summary>
+        /// Initializes the CircleShape with default values.
+        /// </summary>
         protected override void OnInitialize()
         {
+            base.OnInitialize();
+
             TextureRenderer renderer = Parent.GetComponent<TextureRenderer>();
 
             radius = 1f;
             density = 1f;
-
-            base.OnInitialize();
-        }
-
-        protected override Fixture CreateFixture()
-        {
-            return FixtureFactory.AttachCircle(Radius, Density, Parent.GetComponent<PhysicsBody>().Body);
+            
+            Fixture = FixtureFactory.AttachCircle(Radius, Density, ParentBody);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

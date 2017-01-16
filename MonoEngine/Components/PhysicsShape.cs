@@ -14,7 +14,15 @@ namespace MonoEngine.Components
 {
     public abstract class PhysicsShape<T> : Component where T : Shape
     {
-        Fixture fixture;
+        /// <summary>
+        /// The parent Body of the PhysicsShape.
+        /// </summary>
+        protected Body ParentBody { get; private set; }
+
+        /// <summary>
+        /// The fixture associated with the PhysicsShape.
+        /// </summary>
+        protected Fixture Fixture { get; set; }
 
         /// <summary>
         /// The shape instance associated with the Fixture.
@@ -23,34 +31,36 @@ namespace MonoEngine.Components
         {
             get
             {
-                return fixture == null ? null : (T)fixture.Shape;
+                return Fixture == null ? null : (T)Fixture.Shape;
             }
         }
 
         /// <summary>
-        /// Called when the Fixture is created.
+        /// Initializes the PhysicsShape.
         /// </summary>
-        /// <returns></returns>
-        protected abstract Fixture CreateFixture();
-
         protected override void OnInitialize()
         {
-            if (Parent.GetComponent<PhysicsBody>() == null)
+            PhysicsBody physicsBody = Parent.GetComponent<PhysicsBody>();
+
+            if (physicsBody == null)
             {
                 Debug.Log("Cannot add a PhysicsShape to a GameObject without first adding a PhysicsBody.", Debug.LogSeverity.ERROR);
                 Destroy();
                 return;
             }
-            
-            fixture = CreateFixture();
+
+            ParentBody = physicsBody.Body;
         }
 
+        /// <summary>
+        /// Removes the PhysicsShape from the parent GameObject.
+        /// </summary>
         protected override void OnDestroy()
         {
             PhysicsBody parentBody = Parent.GetComponent<PhysicsBody>();
 
-            if (parentBody != null)
-                parentBody.Body.DestroyFixture(fixture);
+            if (parentBody != null && Fixture != null)
+                parentBody.Body.DestroyFixture(Fixture);
         }
     }
 }

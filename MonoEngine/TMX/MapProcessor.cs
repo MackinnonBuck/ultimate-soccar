@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework.Content.Pipeline;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content.Pipeline;
+using MonoEngine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,8 @@ namespace MonoEngine.TMX
     [ContentProcessor(DisplayName = "MapProcessor - MonoEngine")]
     public class MapProcessor : ContentProcessor<XmlReader, Map>
     {
+        private ContentProcessorContext _context;
+
         /// <summary>
         /// Used for easy access of all elements read by an XmlReader.
         /// </summary>
@@ -34,6 +38,8 @@ namespace MonoEngine.TMX
         /// <returns></returns>
         public override Map Process(XmlReader input, ContentProcessorContext context)
         {
+            _context = context;
+
             context.Logger.LogMessage("Processing Map...");
 
             Map map = new Map();
@@ -57,11 +63,8 @@ namespace MonoEngine.TMX
                     case "layer":
                         ProcessTileLayer(input.ReadSubtree(), map);
                         break;
-                    case "imagelayer":
-                        // TODO.
-                        break;
                     case "objectgroup":
-                        // TODO.
+                        ProcessObjectGroup(input.ReadSubtree(), map);
                         break;
                 }
             }
@@ -175,6 +178,79 @@ namespace MonoEngine.TMX
             tileLayer.TileData = tileData;
 
             map.Layers.Add(tileLayer);
+        }
+
+        /// <summary>
+        /// Loads an object group from the given XmlReader.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="map"></param>
+        private void ProcessObjectGroup(XmlReader reader, Map map)
+        {
+            ObjectGroup group = new ObjectGroup();
+
+            foreach (string name in AllElements(reader))
+            {
+                switch (name)
+                {
+                    case "objectgroup":
+                        group.Name = reader["name"];
+                        break;
+                    case "object":
+                        ProcessSubObject(reader.ReadSubtree(), group);
+                        break;
+                }
+            }
+
+            map.Layers.Add(group);
+        }
+
+        /// <summary>
+        /// Processes an individual object from the given XmlReader and ObjectGroup.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="group"></param>
+        private void ProcessSubObject(XmlReader reader, ObjectGroup group)
+        {
+            SubObject subObject = new SubObject();
+
+            foreach (string name in AllElements(reader))
+            {
+                switch (name)
+                {
+                    case "object":
+                        subObject.ID = int.Parse(reader["id"]);
+
+                        if (reader.GetAttribute("type") != null)
+                            subObject.Type = reader["type"];
+
+                        subObject.X = float.Parse(reader["x"]);
+                        subObject.Y = float.Parse(reader["y"]);
+
+                        if (reader.GetAttribute("width") != null)
+                            subObject.Width = float.Parse(reader["width"]);
+
+                        if (reader.GetAttribute("height") != null)
+                            subObject.Height = float.Parse(reader["height"]);
+
+                        if (reader.GetAttribute("rotation") != null)
+                            subObject.Rotation = float.Parse(reader["rotation"]);
+                        break;
+                    case "properties":
+                        ProcessProperties(reader, subObject);
+                        break;
+                    default:
+                        subObject.VertexDataType = name;
+
+                        if (reader.GetAttribute("points") == null)
+                            break;
+
+                        subObject.VertexData = reader["points"];
+                        break;
+                }
+            }
+
+            group.Children.Add(subObject);
         }
     }
 }

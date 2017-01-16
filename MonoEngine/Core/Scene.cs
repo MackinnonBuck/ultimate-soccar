@@ -4,7 +4,7 @@ using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoEngine.Components;
-using MonoEngine.Extensions;
+using MonoEngine.Utilities;
 using MonoEngine.ResourceManagement;
 using MonoEngine.TMX;
 using System;
@@ -23,6 +23,11 @@ namespace MonoEngine.Core
         private string tmxPath;
 
         /// <summary>
+        /// The debug drawer of the physics world.
+        /// </summary>
+        DebugViewXNA debugView;
+
+        /// <summary>
         /// The container for all of the scene's child entities.
         /// </summary>
         internal Container<Entity> Children { get; private set; }
@@ -31,11 +36,6 @@ namespace MonoEngine.Core
         /// The physics world of the scene.
         /// </summary>
         internal World PhysicsWorld { get; private set; }
-
-        /// <summary>
-        /// The debug drawer of the physics world.
-        /// </summary>
-        DebugViewXNA debugView;
 
         /// <summary>
         /// Called when the scene is loaded from a .tmx file.
@@ -73,17 +73,23 @@ namespace MonoEngine.Core
         protected virtual void OnDestroy() { }
 
         /// <summary>
+        /// The private gravity Vector2 of the physics world.
+        /// </summary>
+        private Vector2 _gravity;
+
+        /// <summary>
         /// The gravity of the physics world.
         /// </summary>
         public Vector2 Gravity
         {
             get
             {
-                return PhysicsWorld.Gravity;
+                return _gravity;
             }
             set
             {
-                PhysicsWorld.Gravity = Gravity;
+                _gravity = value;
+                PhysicsWorld.Gravity = _gravity;
             }
         }
 
@@ -126,8 +132,7 @@ namespace MonoEngine.Core
                 switch (property.Key)
                 {
                     case "gravity":
-                        if (!Gravity.TryParse(property.Value))
-                            Debug.Log("Could not correctly parse the \"gravity\" property.", Debug.LogSeverity.WARNING);
+                        Gravity = Parsing.TryParseVector2(property.Value) ?? Gravity;
                         break;
                 }
             }
@@ -140,7 +145,14 @@ namespace MonoEngine.Core
             for (int i = 0; i < map.Layers.Count; i++)
             {
                 if (map.Layers[i] is TileLayer)
-                    Children.Add(new TileLayerObject(map, i));//Children.AddIndependent<TileLayerObject>(map, i);
+                    Children.Add(new TileLayerObject(map, (TileLayer)map.Layers[i]));
+                else if (map.Layers[i] is ObjectGroup)
+                {
+                    ObjectGroup group = (ObjectGroup)map.Layers[i];
+                    
+                    foreach (SubObject sub in group.Children)
+                        GameObjectFactory.Instance.Create(sub.Type ?? "DefaultDefinition", sub);
+                }
             }
             
             OnLoad(map);

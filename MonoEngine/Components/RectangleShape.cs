@@ -29,6 +29,12 @@ namespace MonoEngine.Components
             }
             set
             {
+                if (value == 0)
+                {
+                    Debug.Log("Cannot set width of a RectangleShape to 0.", Debug.LogSeverity.WARNING);
+                    return;
+                }
+
                 width = value;
                 UpdateVertices();
             }
@@ -45,6 +51,12 @@ namespace MonoEngine.Components
             }
             set
             {
+                if (value == 0)
+                {
+                    Debug.Log("Cannot set height of a RectangleShape to 0.", Debug.LogSeverity.WARNING);
+                    return;
+                }
+
                 height = value;
                 UpdateVertices();
             }
@@ -66,18 +78,18 @@ namespace MonoEngine.Components
             }
         }
 
+        /// <summary>
+        /// Creates a RectangleShape with default values.
+        /// </summary>
         protected override void OnInitialize()
         {
+            base.OnInitialize();
+
             width = 1f;
             height = 1f;
             density = 1f;
-
-            base.OnInitialize();
-        }
-
-        protected override Fixture CreateFixture()
-        {
-            return FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.GetComponent<PhysicsBody>().Body);
+            
+            Fixture = FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.GetComponent<PhysicsBody>().Body);
         }
 
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)

@@ -22,6 +22,11 @@ namespace MonoEngine.Components
         {
         }
 
+        /// <summary>
+        /// Draws the texture to the screen.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="gameTime"></param>
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             if (TextureID != null)

@@ -52,6 +52,9 @@ namespace MonoEngine.Core
         /// </summary>
         public GameObject Parent { get; private set; }
 
+        /// <summary>
+        /// The position of the GameObject.
+        /// </summary>
         public Vector2 Position
         {
             get

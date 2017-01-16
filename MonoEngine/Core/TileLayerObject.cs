@@ -14,28 +14,31 @@ namespace MonoEngine.Core
     {
         Map map;
         TileLayer tileLayer;
-        int layerID;
 
-        public TileLayerObject(Map parentMap, int layer)
+        /// <summary>
+        /// Initializes a new TileLayerObject.
+        /// </summary>
+        /// <param name="parentMap"></param>
+        /// <param name="layer"></param>
+        public TileLayerObject(Map parentMap, TileLayer layer)
         {
             map = parentMap;
-            layerID = layer;
+            tileLayer = layer;
         }
 
         public override void Initialize()
         {
-            if ((tileLayer = map.Layers[layerID] as TileLayer) == null)
-            {
-                Debug.Log("TileLayerRenderer can only render TileLayers.", Debug.LogSeverity.ERROR);
-                Destroy();
-                return;
-            }
         }
 
         public override void Update(GameTime gameTime)
         {
         }
 
+        /// <summary>
+        /// Renders the tiles to the screen.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="gameTime"></param>
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             for (int i = 0; i < tileLayer.Height; i++)
@@ -60,6 +63,11 @@ namespace MonoEngine.Core
         {
         }
 
+        /// <summary>
+        /// Returns a Tileset from the given id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private Tileset GetTilesetByID(int id)
         {
             for (int i = 0; i < map.Tilesets.Count; i++)
@@ -80,6 +88,19 @@ namespace MonoEngine.Core
             return new Tileset();
         }
 
+        /// <summary>
+        /// Draws a tile to the screen.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="id"></param>
+        /// <param name="margin"></param>
+        /// <param name="spacing"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
         private void DrawTile(SpriteBatch spriteBatch, string id, int margin, int spacing, int x, int y, int width, int height,
             int row, int column)
         {
@@ -89,7 +110,7 @@ namespace MonoEngine.Core
             srcRect.Width = width;
             srcRect.Height = height;
 
-            TextureManager.Instance.Draw(spriteBatch, id, new Vector2(x, y), srcRect, Color.White, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, layerID);
+            TextureManager.Instance.Draw(spriteBatch, id, new Vector2(x, y), srcRect, Color.White, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
         }
     }
 }

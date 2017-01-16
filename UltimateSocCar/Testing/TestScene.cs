@@ -100,7 +100,7 @@ namespace UltimateSocCar.Testing
                     movingBody.LinearDamping = movingBody.AngularDamping = 25f;
                 }
 
-                movingBody.ApplyForce((Input.Instance.SceneMousePosition - movingBody.Position) * 25f);
+                movingBody.ApplyForce((Input.Instance.SceneMousePosition - movingBody.DisplayPosition) * 25f);
             }
             else
             {
