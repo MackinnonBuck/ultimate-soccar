@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoEngine.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +47,31 @@ namespace MonoEngine.TMX
         {
             Tilesets = new List<Tileset>();
             Layers = new List<Layer>();
+        }
+
+        /// <summary>
+        /// Returns a Tileset from the given id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Tileset GetTilesetByID(int id)
+        {
+            for (int i = 0; i < Tilesets.Count; i++)
+            {
+                if (i + 1 < Tilesets.Count - 1)
+                {
+                    if (id >= Tilesets[i].FirstGID && id < Tilesets[i + 1].FirstGID)
+                        return Tilesets[i];
+                }
+                else
+                {
+                    return Tilesets[i];
+                }
+            }
+
+            Debug.Log("Could not find tileset from ID " + id + ". Returning empty tileset.", Debug.LogSeverity.WARNING);
+
+            return new Tileset();
         }
     }
 }

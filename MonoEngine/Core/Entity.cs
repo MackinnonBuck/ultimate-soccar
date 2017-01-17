@@ -15,10 +15,10 @@ namespace MonoEngine.Core
     {
         public bool Destroyed { get; private set; }
 
-        public abstract void Initialize();
-        public abstract void Update(GameTime gameTime);
-        public abstract void Draw(SpriteBatch spriteBatch, GameTime gameTime);
-        protected abstract void OnDestroy();
+        public virtual void Initialize() { }
+        public virtual void Update(GameTime gameTime) { }
+        public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime) { }
+        protected virtual void OnDestroy() { }
         public void Destroy()
         {
             Destroyed = true;

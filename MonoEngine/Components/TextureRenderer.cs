@@ -14,14 +14,6 @@ namespace MonoEngine.Components
     {
         public string TextureID { get; set; }
 
-        protected override void OnInitialize()
-        {
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
-        }
-
         /// <summary>
         /// Draws the texture to the screen.
         /// </summary>
@@ -31,10 +23,6 @@ namespace MonoEngine.Components
         {
             if (TextureID != null)
                 TextureManager.Instance.Draw(spriteBatch, TextureID, Parent.Position, null, Color.White, Parent.Rotation, null, Parent.Scale, SpriteEffects.None, 1);
-        }
-
-        protected override void OnDestroy()
-        {
         }
     }
 }

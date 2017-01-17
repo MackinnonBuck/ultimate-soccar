@@ -16,7 +16,6 @@ namespace MonoEngine.Components
     public class PolygonShape : PhysicsShape<FarseerPhysics.Collision.Shapes.PolygonShape>
     {
         private Vertices _vertices;
-        private float _density;
 
         /// <summary>
         /// The vertices of the PolygonShape.
@@ -42,6 +41,8 @@ namespace MonoEngine.Components
             }
         }
 
+        private float _density;
+
         /// <summary>
         /// The density of the PolygonShape.
         /// </summary>
@@ -59,33 +60,13 @@ namespace MonoEngine.Components
         }
 
         /// <summary>
-        /// Generates vertices from the given string of vertices.
+        /// Initializes the PolygonShape.
         /// </summary>
-        /// <param name="vertices"></param>
-        public void ParseVertexString(string vertices)
-        {
-            Vertices verts = Parsing.TryParseVertices(vertices);
-
-            Parent.GetComponent<PhysicsBody>().Position += verts.GetCentroid();
-
-            verts.Translate(-verts.GetCentroid());
-
-            Vertices = verts;
-        }
-
         protected override void OnInitialize()
         {
             base.OnInitialize();
 
             _density = 1.0f;
-        }
-
-        protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
         }
     }
 }

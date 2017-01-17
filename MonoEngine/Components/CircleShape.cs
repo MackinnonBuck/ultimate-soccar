@@ -62,13 +62,5 @@ namespace MonoEngine.Components
             
             Fixture = FixtureFactory.AttachCircle(Radius, Density, ParentBody);
         }
-
-        protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
-        }
     }
 }

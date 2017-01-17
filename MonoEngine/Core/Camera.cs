@@ -56,7 +56,7 @@ namespace MonoEngine.Core
 
         public static Camera Create()
         {
-            return App.Instance.ActiveScene.Children.Add(new Camera());
+            return App.Instance.Scene.Children.Add(new Camera());
         }
 
         public override void Initialize()

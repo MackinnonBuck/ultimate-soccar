@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FarseerPhysics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -18,7 +19,7 @@ namespace MonoEngine.Core
         /// <summary>
         /// The Game's active Scene.
         /// </summary>
-        public Scene ActiveScene { get; private set; }
+        public Scene Scene { get; private set; }
 
         Scene futureScene;
 
@@ -58,7 +59,9 @@ namespace MonoEngine.Core
             graphics.PreferredBackBufferHeight = height;
             graphics.IsFullScreen = isFullScreen;
 
-            TargetElapsedTime = System.TimeSpan.FromSeconds(1.0 / frameRate);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / frameRate);
+
+            Settings.MaxPolygonVertices = 32;
 
             ChangeScene(mainScene);
         }
@@ -112,15 +115,15 @@ namespace MonoEngine.Core
 
             if (futureScene != null)
             {
-                ActiveScene?.Destroy();
+                Scene?.Destroy();
 
-                ActiveScene = futureScene;
+                Scene = futureScene;
                 futureScene = null;
 
-                ActiveScene.Initialize();
+                Scene.Initialize();
             }
             
-            ActiveScene.Update(gameTime);
+            Scene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -131,7 +134,7 @@ namespace MonoEngine.Core
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            ActiveScene.Draw(spriteBatch, gameTime);
+            Scene.Draw(spriteBatch, gameTime);
 
             base.Draw(gameTime);
         }

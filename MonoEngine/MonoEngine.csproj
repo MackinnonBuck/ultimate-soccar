@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Components\ChainShape.cs" />
     <Compile Include="Components\CircleShape.cs" />
+    <Compile Include="Components\EllipseShape.cs" />
     <Compile Include="Components\PhysicsBody.cs" />
     <Compile Include="Components\PhysicsJoint.cs" />
     <Compile Include="Components\PhysicsShape.cs" />
@@ -75,13 +76,16 @@
     <Compile Include="Components\RectangleShape.cs" />
     <Compile Include="Components\RevoluteJoint.cs" />
     <Compile Include="Components\TextureRenderer.cs" />
+    <Compile Include="Components\TileRenderer.cs" />
     <Compile Include="Core\Camera.cs" />
+    <Compile Include="Core\ImageLayer.cs" />
     <Compile Include="TMX\DefaultDefinition.cs" />
     <Compile Include="TMX\GameObjectDefinition.cs" />
     <Compile Include="TMX\GameObjectFactory.cs" />
     <Compile Include="Core\Input.cs" />
     <Compile Include="Core\PropertyBinder.cs" />
-    <Compile Include="Core\TileLayerObject.cs" />
+    <Compile Include="Core\TileLayer.cs" />
+    <Compile Include="TMX\ImageLayer.cs" />
     <Compile Include="Utilities\Parsing.cs" />
     <Compile Include="ResourceManagement\TextureManager.cs" />
     <Compile Include="Core\App.cs" />

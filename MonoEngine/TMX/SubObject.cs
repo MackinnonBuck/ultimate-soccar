@@ -16,6 +16,11 @@ namespace MonoEngine.TMX
         public int ID { get; set; }
 
         /// <summary>
+        /// The GID of the SubObject.
+        /// </summary>
+        public int GID { get; set; }
+
+        /// <summary>
         /// The type of the SubObject.
         /// </summary>
         public string Type { get; set; }
@@ -60,6 +65,7 @@ namespace MonoEngine.TMX
         /// </summary>
         public SubObject()
         {
+            GID = -1;
             VertexDataType = string.Empty;
             VertexData = string.Empty;
         }

@@ -77,16 +77,8 @@ namespace MonoEngine.Components
         {
             PhysicsBody parentBody = Parent.GetComponent<PhysicsBody>();
 
-            return JointFactory.CreateRevoluteJoint(App.Instance.ActiveScene.PhysicsWorld, Parent.GetComponent<PhysicsBody>().Body,
+            return JointFactory.CreateRevoluteJoint(App.Instance.Scene.PhysicsWorld, Parent.GetComponent<PhysicsBody>().Body,
                 Parent.Parent.GetComponent<PhysicsBody>().Body, Vector2.Zero);
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
-        }
-
-        protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
         }
     }
 }

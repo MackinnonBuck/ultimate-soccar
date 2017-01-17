@@ -34,22 +34,5 @@ namespace MonoEngine.Components
                 Fixture = FixtureFactory.AttachChainShape(_vertices, ParentBody);
             }
         }
-
-        /// <summary>
-        /// Generates vertices from the given string of vertices.
-        /// </summary>
-        /// <param name="vertices"></param>
-        public void ParseVertexString(string vertices)
-        {
-            Vertices = Parsing.TryParseVertices(vertices);
-        }
-
-        protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
-        }
     }
 }

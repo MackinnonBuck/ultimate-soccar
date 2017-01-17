@@ -14,9 +14,7 @@ namespace MonoEngine.Components
 {
     public class RectangleShape : PhysicsShape<FarseerPhysics.Collision.Shapes.PolygonShape>
     {
-        float width;
-        float height;
-        float density;
+        private float _width;
 
         /// <summary>
         /// The width of the RectangleShape.
@@ -25,7 +23,7 @@ namespace MonoEngine.Components
         {
             get
             {
-                return width;
+                return _width;
             }
             set
             {
@@ -35,10 +33,12 @@ namespace MonoEngine.Components
                     return;
                 }
 
-                width = value;
+                _width = value;
                 UpdateVertices();
             }
         }
+
+        private float _height;
 
         /// <summary>
         /// The height of the RectangleShape.
@@ -47,7 +47,7 @@ namespace MonoEngine.Components
         {
             get
             {
-                return height;
+                return _height;
             }
             set
             {
@@ -57,10 +57,12 @@ namespace MonoEngine.Components
                     return;
                 }
 
-                height = value;
+                _height = value;
                 UpdateVertices();
             }
         }
+
+        private float _density;
 
         /// <summary>
         /// The density of the RectangleShape.
@@ -69,13 +71,58 @@ namespace MonoEngine.Components
         {
             get
             {
-                return density;
+                return _density;
             }
             set
             {
-                density = value;
+                _density = value;
+                Shape.Density = _density;
+            }
+        }
+
+        private Vector2 _offset;
+
+        /// <summary>
+        /// The center offset of the RectangleShape.
+        /// </summary>
+        public Vector2 Offset
+        {
+            get
+            {
+                return _offset;
+            }
+            set
+            {
+                _offset = value;
                 UpdateVertices();
             }
+        }
+
+        private float _angle;
+
+        /// <summary>
+        /// The angle of the RectangleShape.
+        /// </summary>
+        public float Angle
+        {
+            get
+            {
+                return _angle;
+            }
+            set
+            {
+                _angle = value;
+                UpdateVertices();
+            }
+        }
+
+        /// <summary>
+        /// Returns a copy of the RectangleShape's vertices.
+        /// </summary>
+        /// <returns></returns>
+        public Vertices GetVertices()
+        {
+            return new Vertices(Shape.Vertices);
         }
 
         /// <summary>
@@ -85,24 +132,22 @@ namespace MonoEngine.Components
         {
             base.OnInitialize();
 
-            width = 1f;
-            height = 1f;
-            density = 1f;
+            _width = 1f;
+            _height = 1f;
+            _density = 1f;
+            _offset = Vector2.Zero;
+            _angle = 0f;
             
-            Fixture = FixtureFactory.AttachRectangle(width, height, density, Vector2.Zero, Parent.GetComponent<PhysicsBody>().Body);
+            Fixture = FixtureFactory.AttachRectangle(_width, _height, _density, _offset, ParentBody);
         }
 
-        protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-        }
-
-        protected override void OnUpdate(GameTime gameTime)
-        {
-        }
-
+        /// <summary>
+        /// Resets the polygon's vertices and recalculates the body's mass data.
+        /// </summary>
         private void UpdateVertices()
         {
-            Shape.Vertices = PolygonTools.CreateRectangle(width * 0.5f, height * 0.5f);
+            Shape.Vertices = PolygonTools.CreateRectangle(_width * 0.5f, _height * 0.5f, _offset, _angle);           
+            ParentBody.ResetMassData();
         }
     }
 }

@@ -40,7 +40,7 @@ namespace MonoEngine.Core
         /// <summary>
         /// Called when the scene is loaded from a .tmx file.
         /// </summary>
-        protected virtual void OnLoad(Map map) { }
+        protected virtual void OnLoad() { }
 
         /// <summary>
         /// Called when the Scene is initialized.
@@ -76,6 +76,11 @@ namespace MonoEngine.Core
         /// The private gravity Vector2 of the physics world.
         /// </summary>
         private Vector2 _gravity;
+
+        /// <summary>
+        /// The TMX Map associated with the scene.
+        /// </summary>
+        public Map Map { get; private set; }
 
         /// <summary>
         /// The gravity of the physics world.
@@ -125,9 +130,11 @@ namespace MonoEngine.Core
         /// Loads the given Map into the scene.
         /// </summary>
         /// <param name="map"></param>
-        private void Load(Map map)
+        private void LoadMap()
         {
-            foreach (KeyValuePair<string, string> property in map.Properties)
+            Map = App.Instance.Content.Load<Map>(tmxPath);
+
+            foreach (KeyValuePair<string, string> property in Map.Properties)
             {
                 switch (property.Key)
                 {
@@ -137,25 +144,31 @@ namespace MonoEngine.Core
                 }
             }
 
-            foreach (Tileset tileset in map.Tilesets)
+            foreach (Tileset tileset in Map.Tilesets)
             {
-                TextureManager.Instance.Load(tileset.ImageSource, tileset.ImageSource);
+                TextureManager.Instance.Load(tileset.Source, tileset.Source);
             }
 
-            for (int i = 0; i < map.Layers.Count; i++)
+            for (int i = 0; i < Map.Layers.Count; i++)
             {
-                if (map.Layers[i] is TileLayer)
-                    Children.Add(new TileLayerObject(map, (TileLayer)map.Layers[i]));
-                else if (map.Layers[i] is ObjectGroup)
+                if (Map.Layers[i] is TMX.TileLayer)
                 {
-                    ObjectGroup group = (ObjectGroup)map.Layers[i];
+                    Children.Add(new TileLayer((TMX.TileLayer)Map.Layers[i]));
+                }
+                else if (Map.Layers[i] is ObjectGroup)
+                {
+                    ObjectGroup group = (ObjectGroup)Map.Layers[i];
                     
                     foreach (SubObject sub in group.Children)
                         GameObjectFactory.Instance.Create(sub.Type ?? "DefaultDefinition", sub);
                 }
+                else if (Map.Layers[i] is TMX.ImageLayer)
+                {
+                    Children.Add(new ImageLayer((TMX.ImageLayer)Map.Layers[i]));
+                }
             }
             
-            OnLoad(map);
+            OnLoad();
         }
 
         /// <summary>
@@ -177,7 +190,7 @@ namespace MonoEngine.Core
             Camera = Camera.Create();
 
             if (tmxPath != null)
-                Load(App.Instance.Content.Load<Map>(tmxPath));
+                LoadMap();
 
             OnInitialize();
         }

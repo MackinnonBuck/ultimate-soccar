@@ -52,7 +52,7 @@ namespace MonoEngine.TMX
         /// <summary>
         /// The source of the image.
         /// </summary>
-        public string ImageSource { get; set; }
+        public string Source { get; set; }
 
         /// <summary>
         /// The width of the Tileset image.
@@ -77,7 +77,7 @@ namespace MonoEngine.TMX
             Margin = 0;
             TileCount = 0;
             Columns = 0;
-            ImageSource = string.Empty;
+            Source = string.Empty;
             ImageWidth = 0;
             ImageHeight = 0;
         }

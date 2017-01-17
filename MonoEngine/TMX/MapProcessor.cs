@@ -63,6 +63,9 @@ namespace MonoEngine.TMX
                     case "layer":
                         ProcessTileLayer(input.ReadSubtree(), map);
                         break;
+                    case "imagelayer":
+                        ProcessImageLayer(input.ReadSubtree(), map);
+                        break;
                     case "objectgroup":
                         ProcessObjectGroup(input.ReadSubtree(), map);
                         break;
@@ -114,8 +117,8 @@ namespace MonoEngine.TMX
                         tileset.Columns = int.Parse(reader["columns"]);
                         break;
                     case "image":
-                        string imageSource = reader["source"];
-                        tileset.ImageSource = imageSource.Substring(0, imageSource.IndexOf('.'));
+                        string source = reader["source"];
+                        tileset.Source = source.Substring(0, source.IndexOf('.'));
                         tileset.ImageWidth = int.Parse(reader["width"]);
                         tileset.ImageHeight = int.Parse(reader["height"]);
                         break;
@@ -145,6 +148,9 @@ namespace MonoEngine.TMX
                 switch (name)
                 {
                     case "layer":
+                        if (reader.GetAttribute("visible") != null)
+                            return;
+
                         tileLayer.Name = reader["name"];
                         tileLayer.Width = int.Parse(reader["width"]);
                         tileLayer.Height = int.Parse(reader["height"]);
@@ -181,6 +187,44 @@ namespace MonoEngine.TMX
         }
 
         /// <summary>
+        /// Loads an image layer from the given XmlReader.
+        /// </summary>
+        /// <param name="xmlReader"></param>
+        /// <param name="map"></param>
+        private void ProcessImageLayer(XmlReader reader, Map map)
+        {
+            ImageLayer imageLayer = new ImageLayer();
+
+            foreach (string name in AllElements(reader))
+            {
+                switch (name)
+                {
+                    case "imagelayer":
+                        if (reader.GetAttribute("visible") != null)
+                            return;
+
+                        imageLayer.Name = reader["name"];
+
+                        if (reader.GetAttribute("offsetx") != null)
+                            imageLayer.OffsetX = float.Parse(reader["offsetx"]);
+
+                        if (reader.GetAttribute("offsety") != null)
+                            imageLayer.OffsetY = float.Parse(reader["offsety"]);
+                        break;
+                    case "image":
+                        string source = reader["source"];
+                        imageLayer.Source = source.Substring(0, source.IndexOf('.'));
+
+                        imageLayer.Width = int.Parse(reader["width"]);
+                        imageLayer.Height = int.Parse(reader["height"]);
+                        break;
+                }
+            }
+
+            map.Layers.Add(imageLayer);
+        }
+
+        /// <summary>
         /// Loads an object group from the given XmlReader.
         /// </summary>
         /// <param name="reader"></param>
@@ -194,6 +238,9 @@ namespace MonoEngine.TMX
                 switch (name)
                 {
                     case "objectgroup":
+                        if (reader.GetAttribute("visible") != null)
+                            return;
+
                         group.Name = reader["name"];
                         break;
                     case "object":
@@ -220,6 +267,9 @@ namespace MonoEngine.TMX
                 {
                     case "object":
                         subObject.ID = int.Parse(reader["id"]);
+
+                        if (reader.GetAttribute("gid") != null)
+                            subObject.GID = int.Parse(reader["gid"]);
 
                         if (reader.GetAttribute("type") != null)
                             subObject.Type = reader["type"];

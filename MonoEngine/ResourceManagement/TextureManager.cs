@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoEngine.Core;
+using MonoEngine.TMX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,6 +100,43 @@ namespace MonoEngine.ResourceManagement
                 Vector2 textureOrigin = origin ?? new Vector2(texture.Width / 2, texture.Height / 2);
                 spriteBatch.Draw(texture, position, sourceRectangle, color, rotation, textureOrigin, scale, effects, layerDepth);
             }            
+        }
+
+        /// <summary>
+        /// Draws a tile to the screen from the given Tileset, GID, position, and rotation.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="tileset"></param>
+        /// <param name="gid"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void DrawTile(SpriteBatch spriteBatch, Tileset tileset, int gid, int x, int y, float rotation = 0f)
+        {
+            DrawTile(spriteBatch, tileset, gid, x, y, Vector2.Zero, rotation);
+        }
+
+        /// <summary>
+        /// Draws a tile to the screen from the given Tileset, GID, position, origin, and rotation.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        /// <param name="tileset"></param>
+        /// <param name="gid"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="origin"></param>
+        /// <param name="rotation"></param>
+        public void DrawTile(SpriteBatch spriteBatch, Tileset tileset, int gid, int x, int y, Vector2? origin, float rotation = 0f)
+        {
+            Rectangle srcRect;
+            srcRect.X = tileset.Margin + (tileset.Spacing + tileset.TileWidth) *
+                ((gid - tileset.FirstGID) % Math.Max(tileset.Columns, 1));
+            srcRect.Y = tileset.Margin + (tileset.Spacing + tileset.TileHeight) *
+                ((gid - tileset.FirstGID) / Math.Max(tileset.Columns, 1));
+            srcRect.Width = tileset.TileWidth;
+            srcRect.Height = tileset.TileHeight;
+
+            Draw(spriteBatch, tileset.Source, new Vector2(x, y), srcRect,
+                Color.White, rotation, origin, Vector2.One, SpriteEffects.None, 0);
         }
     }
 }

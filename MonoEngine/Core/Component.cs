@@ -15,17 +15,17 @@ namespace MonoEngine.Core
         /// <summary>
         /// Called when the Component is initialized.
         /// </summary>
-        protected abstract void OnInitialize();
+        protected virtual void OnInitialize() { }
 
         /// <summary>
         /// Called when the Component is updated.
         /// </summary>
-        protected abstract void OnUpdate(GameTime gameTime);
+        protected virtual void OnUpdate(GameTime gameTime) { }
 
         /// <summary>
         /// Called when the Component is drawn.
         /// </summary>
-        protected abstract void OnDraw(SpriteBatch spriteBatch, GameTime gameTime);
+        protected virtual void OnDraw(SpriteBatch spriteBatch, GameTime gameTime) { }
 
         /// <summary>
         /// The Parent GameObject.

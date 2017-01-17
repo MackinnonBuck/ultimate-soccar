@@ -119,7 +119,7 @@ namespace MonoEngine.Core
         /// <returns></returns>
         public static GameObject Create(GameObject parent)
         {
-            return parent == null ? App.Instance.ActiveScene.Children.Add(new GameObject())
+            return parent == null ? App.Instance.Scene.Children.Add(new GameObject())
                 : parent.children.Add(new GameObject(parent));
         }
 
@@ -139,7 +139,7 @@ namespace MonoEngine.Core
         /// <returns></returns>
         public static List<GameObject> GetAll(GameObject parent = null)
         {
-            return parent == null ? App.Instance.ActiveScene.Children.GetAll<GameObject>() : parent.children.GetAll<GameObject>();
+            return parent == null ? App.Instance.Scene.Children.GetAll<GameObject>() : parent.children.GetAll<GameObject>();
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace MonoEngine.Core
         /// <returns></returns>
         public static GameObject Get(GameObject parent = null)
         {
-            return parent == null ? App.Instance.ActiveScene.Children.Get<GameObject>() : parent.children.Get<GameObject>();
+            return parent == null ? App.Instance.Scene.Children.Get<GameObject>() : parent.children.Get<GameObject>();
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace MonoEngine.Core
             components.Destroy();
 
             if (Parent == null)
-                App.Instance.ActiveScene.Children.Remove(this);
+                App.Instance.Scene.Children.Remove(this);
             else
                 Parent.children.Remove(this);
         }
