@@ -266,7 +266,13 @@ namespace MonoEngine.TMX
                 switch (name)
                 {
                     case "object":
+                        if (reader.GetAttribute("visible") != null)
+                            return;
+
                         subObject.ID = int.Parse(reader["id"]);
+
+                        if (reader.GetAttribute("name") != null)
+                            subObject.Name = reader["name"];
 
                         if (reader.GetAttribute("gid") != null)
                             subObject.GID = int.Parse(reader["gid"]);

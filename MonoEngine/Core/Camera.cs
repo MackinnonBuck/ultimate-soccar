@@ -11,6 +11,9 @@ namespace MonoEngine.Core
 {
     public class Camera : Entity
     {
+        /// <summary>
+        /// The Camera's Viewport.
+        /// </summary>
         public Viewport Viewport
         {
             get
@@ -24,6 +27,9 @@ namespace MonoEngine.Core
         public float Rotation { get; set; }
         public Vector2 Scale { get; set; }
 
+        /// <summary>
+        /// Gets the Camera's view matrix.
+        /// </summary>
         public Matrix ViewMatrix
         {
             get
@@ -37,6 +43,9 @@ namespace MonoEngine.Core
             }
         }
 
+        /// <summary>
+        /// Gets the Camera's view matrix in sim units.
+        /// </summary>
         public Matrix SimViewMatrix
         {
             get
@@ -54,6 +63,10 @@ namespace MonoEngine.Core
         {
         }
 
+        /// <summary>
+        /// Creates a new Camera.
+        /// </summary>
+        /// <returns></returns>
         public static Camera Create()
         {
             return App.Instance.Scene.Children.Add(new Camera());

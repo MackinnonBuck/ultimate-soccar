@@ -64,7 +64,7 @@ namespace MonoEngine.TMX
         {
             if (!definitions.ContainsKey(type))
             {
-                Debug.Log("Invalid definition name " + type + ".", Debug.LogSeverity.ERROR);
+                Debug.Log("Invalid definition name \"" + type + "\".", Debug.LogSeverity.ERROR);
                 return null;
             }
 

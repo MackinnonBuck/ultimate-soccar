@@ -15,11 +15,6 @@ namespace MonoEngine.TMX
         public int FirstGID { get; set; }
 
         /// <summary>
-        /// The name of the tileset.
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
         /// The width of each individual tile.
         /// </summary>
         public int TileWidth { get; set; }

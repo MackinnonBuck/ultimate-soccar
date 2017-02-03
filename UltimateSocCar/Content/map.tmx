@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="32" tileheight="32" nextobjectid="24">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="32" tileheight="32" nextobjectid="32">
  <properties>
   <property name="gravity" value="0,9.81"/>
  </properties>
@@ -9,7 +9,7 @@
   </properties>
   <image source="Textures/blocks1.png" width="614" height="376"/>
  </tileset>
- <imagelayer name="Image Layer 1">
+ <imagelayer name="Image Layer 1" visible="0">
   <image source="Textures/Desert.jpg" width="1024" height="768"/>
  </imagelayer>
  <layer name="Tile Layer 1" width="20" height="15">

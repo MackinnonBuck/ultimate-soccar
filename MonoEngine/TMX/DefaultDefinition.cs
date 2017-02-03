@@ -10,6 +10,8 @@ using MonoEngine.Utilities;
 using FarseerPhysics.Common;
 using FarseerPhysics;
 using FarseerPhysics.Collision;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
 
 namespace MonoEngine.TMX
 {
@@ -29,11 +31,10 @@ namespace MonoEngine.TMX
         /// <returns></returns>
         public override GameObject Create(SubObject baseObject)
         {
-            GameObject gameObject = GameObject.Create();
+            GameObject gameObject = GameObject.Create(baseObject.Name ?? string.Empty);
             gameObject.Position = new Vector2(baseObject.X, baseObject.Y);
 
-            PhysicsBody body = gameObject.AddComponent<PhysicsBody>();
-            body.BodyType = FarseerPhysics.Dynamics.BodyType.Static;
+            Body body = gameObject.AddComponent<BodyComponent>().Body;
 
             switch (baseObject.VertexDataType)
             {
@@ -45,68 +46,73 @@ namespace MonoEngine.TMX
                         body.Position += verts.GetCentroid();
                         verts.Translate(-verts.GetCentroid());
 
-                        gameObject.AddComponent<PolygonShape>().Vertices = verts;
+                        gameObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachPolygon(verts, 1.0f, body);
                     }
                     break;
                 case "polyline":
                     {
                         Vertices verts = Parsing.TryParseVertices(baseObject.VertexData);
 
+                        if (verts.Count < 2)
+                            break;
+
                         verts.Rotate(MathHelper.ToRadians(baseObject.Rotation));
-                        gameObject.AddComponent<ChainShape>().Vertices = verts;
+                        gameObject.AddComponent<FixtureComponent>().Fixture = verts.Count > 2 ? FixtureFactory.AttachChainShape(verts, body) :
+                            FixtureFactory.AttachEdge(verts[0], verts[1], body);
                     }
                     break;
                 case "ellipse":
                     {
                         if (baseObject.Width == baseObject.Height)
                         {
-                            CircleShape cc = gameObject.AddComponent<CircleShape>();
+                            Fixture fixture = gameObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(baseObject.Width) * 0.5f, 1.0f, body);
 
-                            cc.Radius = ConvertUnits.ToSimUnits(baseObject.Width) * 0.5f;
-
-                            body.Position += new Vector2(cc.Radius);
+                            body.Position += new Vector2(fixture.Shape.Radius);
                             body.Rotation += MathHelper.ToRadians(baseObject.Rotation);
                         }
                         else
                         {
-                            EllipseShape es = gameObject.AddComponent<EllipseShape>();
+                            float xRadius = ConvertUnits.ToSimUnits(baseObject.Width) * 0.5f;
+                            float yRadius = ConvertUnits.ToSimUnits(baseObject.Height) * 0.5f;
 
-                            es.XRadius = ConvertUnits.ToSimUnits(baseObject.Width) * 0.5f;
-                            es.YRadius = ConvertUnits.ToSimUnits(baseObject.Height) * 0.5f;
-                            es.Translate(new Vector2(es.XRadius, es.YRadius));
-                            es.Rotate(MathHelper.ToRadians(baseObject.Rotation));
+                            Fixture fixture = gameObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachEllipse(
+                                xRadius, yRadius, 16, 1.0f, body);
 
-                            Vector2 centroid = es.GetVertices().GetCentroid();
+                            FarseerPhysics.Collision.Shapes.PolygonShape shape = (FarseerPhysics.Collision.Shapes.PolygonShape)fixture.Shape;
+                            shape.Vertices.Translate(new Vector2(xRadius, yRadius));
+                            shape.Vertices.Rotate(MathHelper.ToRadians(baseObject.Rotation));
+
+                            Vector2 centroid = shape.Vertices.GetCentroid();
 
                             body.Position += centroid;
-                            es.Translate(-centroid);
+                            shape.Vertices.Translate(-centroid);
 
                             body.Rotation += MathHelper.ToRadians(baseObject.Rotation);
-                            es.Rotate(-body.Rotation);
+                            shape.Vertices.Rotate(-body.Rotation);
                         }
                     }
                     break;
                 default:
                     {
-                        RectangleShape rc = gameObject.AddComponent<RectangleShape>();
+                        Fixture fixture = gameObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachRectangle(
+                            ConvertUnits.ToSimUnits(baseObject.Width), ConvertUnits.ToSimUnits(baseObject.Height), 1.0f, Vector2.Zero, body);
 
-                        rc.Width = ConvertUnits.ToSimUnits(baseObject.Width);
-                        rc.Height = ConvertUnits.ToSimUnits(baseObject.Height);
-                        rc.Angle = MathHelper.ToRadians(baseObject.Rotation);
+                        FarseerPhysics.Collision.Shapes.PolygonShape shape = (FarseerPhysics.Collision.Shapes.PolygonShape)fixture.Shape;
+                        shape.Vertices.Rotate(MathHelper.ToRadians(baseObject.Rotation));
 
                         if (baseObject.GID == -1)
                         {
-                            body.Position += rc.GetVertices()[1]; // top-left vertex;
+                            body.Position += shape.Vertices[1]; // top-left vertex;
                         }
                         else
                         {
-                            body.Position += rc.GetVertices()[0];
+                            body.Position += shape.Vertices[0];
                             TileRenderer tr = gameObject.AddComponent<TileRenderer>();
                             tr.GID = baseObject.GID;
                         }
 
-                        body.Rotation += rc.Angle;
-                        rc.Angle = 0;
+                        body.Rotation = MathHelper.ToRadians(baseObject.Rotation);
+                        shape.Vertices.Rotate(-body.Rotation);
                     }
                     break;
             }

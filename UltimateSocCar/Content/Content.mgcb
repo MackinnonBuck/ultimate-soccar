@@ -67,3 +67,8 @@
 /processorParam:TextureFormat=Color
 /build:Textures/Desert.jpg
 
+#begin test_arena_0.tmx
+/importer:MapImporter
+/processor:MapProcessor
+/build:test_arena_0.tmx
+

@@ -10,6 +10,11 @@ namespace MonoEngine.TMX
     public abstract class Element
     {
         /// <summary>
+        /// The name of the Layer.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// The custom properties associated with the Map.
         /// </summary>
         public Dictionary<string, string> Properties { get; protected set; }
@@ -19,6 +24,7 @@ namespace MonoEngine.TMX
         /// </summary>
         public Element()
         {
+            Name = string.Empty;
             Properties = new Dictionary<string, string>();
         }
     }

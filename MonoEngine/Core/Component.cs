@@ -72,9 +72,5 @@ namespace MonoEngine.Core
         {
             OnDraw(spriteBatch, gameTime);
         }
-
-        protected override void OnDestroy()
-        {
-        }
     }
 }

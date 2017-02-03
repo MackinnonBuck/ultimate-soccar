@@ -17,7 +17,7 @@ namespace UltimateSocCar.Testing
 {
     public class TestScene : Scene
     {
-        PhysicsBody movingBody;
+        BodyComponent movingBody;
         string map;
 
         public TestScene(string mapPath)
@@ -72,51 +72,52 @@ namespace UltimateSocCar.Testing
 
                         GameObject newObject = GameObject.Create(parent);
                         newObject.Position = Input.Instance.SceneMousePosition;
-                        movingBody = newObject.AddComponent<PhysicsBody>();
+                        movingBody = newObject.AddComponent<BodyComponent>();
 
                         if (Input.Instance.IsMouseButtonDown(Input.MouseButtons.LEFT))
                         {
-                            RectangleShape rectangleShape = newObject.AddComponent<RectangleShape>();
-                            rectangleShape.Width = rectangleShape.Height = 0.5f;
+                            Fixture fixture = newObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachRectangle(
+                                0.5f, 0.5f, 1.0f, Vector2.Zero, movingBody.Body);
                             newObject.AddComponent<TextureRenderer>().TextureID = "Pin";
                             newObject.Scale = new Vector2(0.2f);
                         }
                         else
                         {
-                            CircleShape circleShape = newObject.AddComponent<CircleShape>();
-                            circleShape.Radius = 0.5f;
+                            Fixture fixture = newObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachCircle(
+                                0.5f, 1.0f, movingBody.Body);
                             newObject.AddComponent<TextureRenderer>().TextureID = "Earth";
                             newObject.Scale = new Vector2(0.04f);
                         }
 
                         if (newObject.Parent != null)
                         {
-                            newObject.AddComponent<RevoluteJoint>();
+                            newObject.AddComponent<JointComponent>().Joint = JointFactory.CreateRevoluteJoint(PhysicsWorld, movingBody.Body,
+                                parent.GetComponent<BodyComponent>().Body, Vector2.Zero);
                         }
                     }
 
-                    movingBody.BodyType = BodyType.Dynamic;
-                    movingBody.Mass = 1f;
-                    movingBody.LinearDamping = movingBody.AngularDamping = 25f;
+                    movingBody.Body.BodyType = BodyType.Dynamic;
+                    movingBody.Body.Mass = 1f;
+                    movingBody.Body.LinearDamping = movingBody.Body.AngularDamping = 25f;
                 }
 
-                movingBody.ApplyForce((Input.Instance.SceneMousePosition - movingBody.DisplayPosition) * 25f);
+                movingBody.Body.ApplyForce((Input.Instance.SceneMousePosition - movingBody.DisplayPosition) * 25f);
             }
             else
             {
                 if (movingBody != null)
                 {
-                    movingBody.LinearDamping = movingBody.AngularDamping = 0f;
+                    movingBody.Body.LinearDamping = movingBody.Body.AngularDamping = 0f;
 
-                    if (movingBody.Parent.GetComponent<RectangleShape>() != null)
-                        movingBody.BodyType = BodyType.Static;
+                    if (movingBody.Parent.GetComponent<FixtureComponent>().Fixture.Shape.ShapeType != FarseerPhysics.Collision.Shapes.ShapeType.Circle)
+                        movingBody.Body.BodyType = BodyType.Static;
 
                     movingBody = null;
                 }
 
                 if (Input.Instance.IsMouseButtonDown(Input.MouseButtons.MIDDLE))
                 {
-                    PhysicsBody body = GetBodyAt(Input.Instance.SceneMousePosition);
+                    BodyComponent body = GetBodyAt(Input.Instance.SceneMousePosition);
 
                     if (body != null)
                         body.Parent.Destroy();

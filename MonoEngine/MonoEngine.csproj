@@ -66,15 +66,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\ChainShape.cs" />
-    <Compile Include="Components\CircleShape.cs" />
-    <Compile Include="Components\EllipseShape.cs" />
-    <Compile Include="Components\PhysicsBody.cs" />
-    <Compile Include="Components\PhysicsJoint.cs" />
-    <Compile Include="Components\PhysicsShape.cs" />
-    <Compile Include="Components\PolygonShape.cs" />
-    <Compile Include="Components\RectangleShape.cs" />
-    <Compile Include="Components\RevoluteJoint.cs" />
+    <Compile Include="Components\BodyComponent.cs" />
+    <Compile Include="Components\FixtureComponent.cs" />
+    <Compile Include="Components\JointComponent.cs" />
     <Compile Include="Components\TextureRenderer.cs" />
     <Compile Include="Components\TileRenderer.cs" />
     <Compile Include="Core\Camera.cs" />
@@ -107,6 +101,7 @@
     <Compile Include="TMX\SubObject.cs" />
     <Compile Include="TMX\TileLayer.cs" />
     <Compile Include="TMX\Tileset.cs" />
+    <Compile Include="Utilities\PhysicsHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Farseer Physics Engine 3.5\Farseer Physics DebugView 3.5\DebugView MonoGame.csproj">

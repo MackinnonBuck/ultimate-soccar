@@ -30,5 +30,15 @@ namespace MonoEngine.Core
             Console.WriteLine(o.ToString());
 #endif
         }
+
+        /// <summary>
+        /// Clears the console of all existing messages.
+        /// </summary>
+        public static void Clear()
+        {
+#if DEBUG
+            Console.Clear();
+#endif
+        }
     }
 }

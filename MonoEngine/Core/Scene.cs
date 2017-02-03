@@ -35,7 +35,7 @@ namespace MonoEngine.Core
         /// <summary>
         /// The physics world of the scene.
         /// </summary>
-        internal World PhysicsWorld { get; private set; }
+        public World PhysicsWorld { get; private set; }
 
         /// <summary>
         /// Called when the scene is loaded from a .tmx file.
@@ -73,30 +73,9 @@ namespace MonoEngine.Core
         protected virtual void OnDestroy() { }
 
         /// <summary>
-        /// The private gravity Vector2 of the physics world.
-        /// </summary>
-        private Vector2 _gravity;
-
-        /// <summary>
         /// The TMX Map associated with the scene.
         /// </summary>
         public Map Map { get; private set; }
-
-        /// <summary>
-        /// The gravity of the physics world.
-        /// </summary>
-        public Vector2 Gravity
-        {
-            get
-            {
-                return _gravity;
-            }
-            set
-            {
-                _gravity = value;
-                PhysicsWorld.Gravity = _gravity;
-            }
-        }
 
         /// <summary>
         /// Determines if debug drawing is enabled.
@@ -139,7 +118,7 @@ namespace MonoEngine.Core
                 switch (property.Key)
                 {
                     case "gravity":
-                        Gravity = Parsing.TryParseVector2(property.Value) ?? Gravity;
+                        PhysicsWorld.Gravity = Parsing.TryParseVector2(property.Value) ?? PhysicsWorld.Gravity;
                         break;
                 }
             }
@@ -249,9 +228,9 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="point"></param>
         /// <returns>true if a body exists at the given point.</returns>
-        public List<PhysicsBody> GetBodiesAt(Vector2 point)
+        public List<BodyComponent> GetBodiesAt(Vector2 point)
         {
-            return PhysicsWorld.TestPointAll(ConvertUnits.ToSimUnits(point)).ConvertAll(fixture => (PhysicsBody)fixture.Body.UserData);
+            return PhysicsWorld.TestPointAll(ConvertUnits.ToSimUnits(point)).ConvertAll(fixture => (BodyComponent)fixture.Body.UserData);
         }
 
         /// <summary>
@@ -259,12 +238,12 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="point"></param>
         /// <returns>the first PhysicsBody located at the given point, or null of no PhysicsBody is found.</returns>
-        public PhysicsBody GetBodyAt(Vector2 point)
+        public BodyComponent GetBodyAt(Vector2 point)
         {
             Fixture fixture = PhysicsWorld.TestPoint(ConvertUnits.ToSimUnits(point));
 
             if (fixture != null)
-                return (PhysicsBody)fixture.Body.UserData;
+                return (BodyComponent)fixture.Body.UserData;
 
             return null;
         }

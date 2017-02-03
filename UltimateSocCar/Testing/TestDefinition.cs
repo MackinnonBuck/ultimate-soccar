@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using Microsoft.Xna.Framework;
 using MonoEngine.Components;
 using MonoEngine.Core;
 using MonoEngine.TMX;
@@ -20,14 +22,12 @@ namespace UltimateSocCar.Testing
         {
             GameObject gameObject = GameObject.Create();
 
-            PhysicsBody body = gameObject.AddComponent<PhysicsBody>();
+            Body body = gameObject.AddComponent<BodyComponent>().Body;
             body.Mass = 1.0f;
 
             gameObject.Position = Vector2.Zero;
 
-            RectangleShape shape = gameObject.AddComponent<RectangleShape>();
-            shape.Width = 2.0f;
-            shape.Height = 2.0f;
+            gameObject.AddComponent<FixtureComponent>().Fixture = FixtureFactory.AttachRectangle(2.0f, 2.0f, 1.0f, Vector2.Zero, body);
 
             return gameObject;
         }

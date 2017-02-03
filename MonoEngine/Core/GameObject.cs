@@ -15,6 +15,11 @@ namespace MonoEngine.Core
     public class GameObject : Entity
     {
         /// <summary>
+        /// The name of the GameObject.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// Manages rebindable properties of the GameObject.
         /// </summary>
         internal PropertyBinder PropertyBinder { get; private set; }
@@ -100,15 +105,16 @@ namespace MonoEngine.Core
         /// <summary>
         /// Creates the GameObject with a parent.
         /// </summary>
-        private GameObject(GameObject parent)
+        private GameObject(GameObject parent, string name)
         {
             Parent = parent;
+            Name = name ?? string.Empty;
         }
 
         /// <summary>
         /// Creates the GameObject without a parent.
         /// </summary>
-        private GameObject() : this(null)
+        private GameObject(string name) : this(null, name)
         {
         }
 
@@ -117,19 +123,19 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static GameObject Create(GameObject parent)
+        public static GameObject Create(GameObject parent, string name = "")
         {
-            return parent == null ? App.Instance.Scene.Children.Add(new GameObject())
-                : parent.children.Add(new GameObject(parent));
+            return parent == null ? App.Instance.Scene.Children.Add(new GameObject(name))
+                : parent.children.Add(new GameObject(parent, name));
         }
 
         /// <summary>
         /// Used for creating an instance of GameObjet without a parent.
         /// </summary>
         /// <returns></returns>
-        public static GameObject Create()
+        public static GameObject Create(string name = "")
         {
-            return Create(null);
+            return Create(null, name);
         }
 
         /// <summary>
@@ -137,9 +143,11 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static List<GameObject> GetAll(GameObject parent = null)
+        public static List<GameObject> GetAll(GameObject parent = null, string name = null)
         {
-            return parent == null ? App.Instance.Scene.Children.GetAll<GameObject>() : parent.children.GetAll<GameObject>();
+            List<GameObject> gameObjects = parent == null ? App.Instance.Scene.Children.GetAll<GameObject>() : parent.children.GetAll<GameObject>();
+
+            return name == null ? gameObjects : (from x in gameObjects where x.Name == name select x).ToList();
         }
 
         /// <summary>
@@ -147,9 +155,17 @@ namespace MonoEngine.Core
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static GameObject Get(GameObject parent = null)
+        public static GameObject Get(GameObject parent = null, string name = null)
         {
-            return parent == null ? App.Instance.Scene.Children.Get<GameObject>() : parent.children.Get<GameObject>();
+            if (name == null)
+            {
+                return parent == null ? App.Instance.Scene.Children.Get<GameObject>() : parent.children.Get<GameObject>();
+            }
+            else
+            {
+                List<GameObject> gameObjects = GetAll(parent, name);
+                return gameObjects.Count == 0 ? null : gameObjects.First();
+            }
         }
 
         /// <summary>

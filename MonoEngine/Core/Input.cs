@@ -24,7 +24,7 @@ namespace MonoEngine.Core
         }
 
         /// <summary>
-        /// used for passing keyboard input information to an event.
+        /// Used for passing keyboard input information to an event.
         /// </summary>
         public class KeyboardInputEventArgs : EventArgs
         {
@@ -127,6 +127,11 @@ namespace MonoEngine.Core
         public event EventHandler<KeyboardInputEventArgs> OnKeyReleased;
 
         /// <summary>
+        /// Gets the array of plugged in GamePads.
+        /// </summary>
+        public GamePadState[] GamePads { get; private set; }
+
+        /// <summary>
         /// Initializes this instance.
         /// </summary>
         private Input()
@@ -139,6 +144,8 @@ namespace MonoEngine.Core
 
             pressedMouseButtons = new bool[3];
             pressedKeys = new Keys[0];
+
+            GamePads = new GamePadState[GamePad.MaximumGamePadCount];
         }
 
         /// <summary>
@@ -149,7 +156,7 @@ namespace MonoEngine.Core
             MouseState currentMouseState = Mouse.GetState();
             KeyboardState currentKeyboardState = Keyboard.GetState();
 
-            Vector2 currentMousePosition = Mouse.GetState().Position.ToVector2();
+            Vector2 currentMousePosition = currentMouseState.Position.ToVector2();
             MouseSpeed = currentMousePosition - MousePosition;
             MousePosition = currentMousePosition;
 
@@ -159,7 +166,7 @@ namespace MonoEngine.Core
                 currentMouseState.RightButton == ButtonState.Pressed
             };
             
-            int currentWheelPosition = Mouse.GetState().ScrollWheelValue;
+            int currentWheelPosition = currentMouseState.ScrollWheelValue;
             WheelSpeed = currentWheelPosition - WheelPosition;
             WheelPosition = currentWheelPosition;
 
@@ -202,6 +209,9 @@ namespace MonoEngine.Core
             }
 
             pressedKeys = currentKeys;
+
+            for (int i = 0; i < GamePad.MaximumGamePadCount; i++)
+                GamePads[i] = GamePad.GetState(i);
         }
 
         /// <summary>
