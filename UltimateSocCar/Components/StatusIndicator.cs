@@ -54,6 +54,11 @@ namespace UltimateSocCar.Components
         public int VerticalOffset { get; set; }
 
         /// <summary>
+        /// The horizontal positional offset.
+        /// </summary>
+        public int HorizontalOffset { get; set; }
+
+        /// <summary>
         /// Sets or gets if the indicator is visible.
         /// </summary>
         public bool Visible { get; set; }
@@ -86,7 +91,7 @@ namespace UltimateSocCar.Components
         protected override void OnDraw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             if (Visible)
-                spriteBatch.Draw(rect, Parent.Position + new Vector2(-Width / 2, VerticalOffset - Height / 2), Color);
+                spriteBatch.Draw(rect, Parent.Position + new Vector2(HorizontalOffset - Width / 2, VerticalOffset - Height / 2), Color);
         }
 
         /// <summary>

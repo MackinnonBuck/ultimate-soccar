@@ -11,32 +11,33 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics.Joints;
 using MonoEngine.Utilities;
+using FarseerPhysics;
+using Microsoft.Xna.Framework.Input;
+using UltimateSocCar.Utilities;
 
 namespace UltimateSocCar.Components
 {
     public class Car : Component
     {
         // Constants
-
-        const float TopSpeed = 10f;
-        const float SpeedLimit = 14f;
+        const float TopSpeed = 14.0f;
+        const float SpeedLimit = 23.0f;
+        const float SupersonicTolerance = 1.0f;
 
         const float WheelOffsetX = 0.4f;
-        const float WheelOffsetY = 0.2f;
+        const float WheelOffsetY = 0.15f;
         const float WheelRadius = 0.15f;
-        const float WheelTopSpeed = TopSpeed / WheelRadius;
 
-        const float WheelStrongForce = 15.0f;
+        const float WheelStrongForce = 10.0f;
         const float WheelWeakForce = 5.0f;
 
-        const float BoostForceX = 6f;
+        const float BoostForceX = 5f;
         const float BoostForceY = 8f;
 
         const float AccelerationTorque = 0.5f;
-        const float AccelerationCurveThreshold = WheelTopSpeed * 0.75f;
-        const float BrakingTorque = 0.5f;
+        const float AccelerationCurveThreshold = TopSpeed * 0.75f;
+        const float BrakingTorque = 0.75f;
         const float CoastingTorque = 0.1f;
-        const float LimitingTorque = 2.0f;
 
         const float BodyWidth = 1.18f;
         const float BodyHeight = 0.36f;
@@ -47,6 +48,12 @@ namespace UltimateSocCar.Components
         const float BodyAngularImpulse = 0.05f;
 
         const float ThrottleTolerance = 0.1f;
+
+        const float FirstJumpImpulse = 2.0f;
+        const float FirstJumpForce = 6.0f;
+        const float FirstJumpHoldTime = 0.5f;
+        const float JumpCooldownThreshold = 0.25f;
+        const float SecondJumpDelayTime = 1.5f;
 
         // Physics components
 
@@ -60,6 +67,15 @@ namespace UltimateSocCar.Components
         StatusIndicator throttleIndicator;
         StatusIndicator limitIndicator;
 
+        TimeKeeper timeKeeper;
+        TimeKeeper.Timer jumpHoldTimer;
+        TimeKeeper.Timer secondJumpTimer;
+
+        Vector2 firstJumpDirection;
+
+        bool tryJump;
+        bool canDodge;
+
         /// <summary>
         /// Returns true if both wheels are touching the ground.
         /// </summary>
@@ -72,13 +88,24 @@ namespace UltimateSocCar.Components
         }
 
         /// <summary>
-        /// Returns true if one of the two wheels are touching the ground.
+        /// Returns true if one of the wheels is sticky.
         /// </summary>
-        bool PartiallyGrounded
+        bool Sticky
         {
             get
             {
-                return frontWheel.Grounded || rearWheel.Grounded;
+                return frontWheel.Sticky || rearWheel.Sticky;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the car is supersonic.
+        /// </summary>
+        bool Supersonic
+        {
+            get
+            {
+                return body.LinearVelocity.Length() > SpeedLimit - SupersonicTolerance;
             }
         }
 
@@ -109,21 +136,14 @@ namespace UltimateSocCar.Components
         }
 
         /// <summary>
-        /// Gets a gravity vector relative to the car's rotation.
-        /// </summary>
-        Vector2 RelativeGravity
-        {
-            get
-            {
-                return Vector2.Transform(App.Instance.Scene.PhysicsWorld.Gravity, Matrix.CreateRotationZ(body.Rotation));
-            }
-        }
-
-        /// <summary>
         /// Initializes the car by creating the body and wheels.
         /// </summary>
         protected override void OnInitialize()
         {
+            Parent.AddComponent<TextureRenderer>().TextureID = "Car";
+
+            Input.Instance.OnButtonStateChanged += ButtonStateChanged;
+
             body = Parent.AddComponent<BodyComponent>().Body;
             body.BodyType = BodyType.Static;
 
@@ -150,6 +170,15 @@ namespace UltimateSocCar.Components
             gravity.AddBody(body);
             gravity.AddBody(rearWheel.Body);
             gravity.AddBody(frontWheel.Body);
+
+            timeKeeper = new TimeKeeper();
+            jumpHoldTimer = new TimeKeeper.Timer();
+            secondJumpTimer = new TimeKeeper.Timer();
+
+            firstJumpDirection = Vector2.Zero;
+
+            tryJump = false;
+            canDodge = false;
         }
 
         /// <summary>
@@ -158,26 +187,45 @@ namespace UltimateSocCar.Components
         /// <param name="gameTime"></param>
         protected override void OnUpdate(GameTime gameTime)
         {
+            timeKeeper.Update();
+
             if (body.BodyType != BodyType.Dynamic)
                 body.BodyType = BodyType.Dynamic;
 
-            bool boosting = Input.Instance.GamePads[0].Buttons.X == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            bool jumping = Input.Instance.GamePads[0].Buttons.A == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
+            bool boosting = Input.Instance.GamePads[0].Buttons.X == ButtonState.Pressed;
             float throttle = boosting ? 1.0f : Input.Instance.GamePads[0].Triggers.Right - Input.Instance.GamePads[0].Triggers.Left;
             float rotation = Input.Instance.GamePads[0].ThumbSticks.Left.X;
 
-            // Car rotation and wheel magnets
-            if (Grounded && !jumping)
+            if (Grounded)
+                canDodge = true;
+
+            if (tryJump)
             {
-                // Apply strong force against the ground
-                rearWheel.Body.ApplyForce(-rearWheel.GroundNormal * WheelStrongForce);
-                frontWheel.Body.ApplyForce(-frontWheel.GroundNormal * WheelStrongForce);
+                if (Grounded)
+                {
+                    firstJumpDirection = Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(body.Rotation));
+                    body.ApplyLinearImpulse(firstJumpDirection * FirstJumpImpulse);
+                    jumpHoldTimer = timeKeeper.StartTimer(FirstJumpHoldTime, null, () => Input.Instance.GamePads[0].IsButtonUp(Buttons.A));
+                    secondJumpTimer = timeKeeper.StartTimer(SecondJumpDelayTime, () => canDodge = false, () => secondJumpTimer.SecondsRemaining < SecondJumpDelayTime - JumpCooldownThreshold && Grounded);
+                }
+                else
+                {
+                    if (canDodge)
+                    {
+                        canDodge = false;
+                        body.ApplyLinearImpulse(Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(body.Rotation)) * FirstJumpImpulse);
+                        secondJumpTimer.Cancel();
+                    }
+                }
             }
-            else if (PartiallyGrounded && !jumping)
+
+            body.ApplyForce(firstJumpDirection * FirstJumpForce * (jumpHoldTimer.SecondsRemaining / FirstJumpHoldTime));
+
+            // Car rotation and wheel magnets
+            if (Sticky)
             {
-                // Apply weak force toward the ground
-                rearWheel.Body.ApplyForce(-rearWheel.GroundNormal * WheelWeakForce);
-                frontWheel.Body.ApplyForce(-frontWheel.GroundNormal * WheelWeakForce);
+                rearWheel.Body.ApplyForce(-rearWheel.GroundNormal * (Grounded ? WheelStrongForce : WheelWeakForce));
+                frontWheel.Body.ApplyForce(-frontWheel.GroundNormal * (Grounded ? WheelStrongForce : WheelWeakForce));
             }
             else
             {
@@ -185,9 +233,52 @@ namespace UltimateSocCar.Components
                 body.ApplyAngularImpulse(rotation * BodyAngularImpulse);
             }
 
+            if (!Sticky || throttle == 0.0f)
+            {
+                if (Grounded) // Apply fake gravity force + fake real gravity force
+                    gravity.Value = Vector2.Transform(App.Instance.Scene.PhysicsWorld.Gravity,
+                        Matrix.CreateRotationZ(body.Rotation - (float)(Math.PI * 0.5))) * (float)Math.Sin(body.Rotation);
+                else // Car is free - apply normal gravity
+                    gravity.Value = App.Instance.Scene.PhysicsWorld.Gravity;
+
+                throttleIndicator.Color = Color.Yellow;
+
+                WheelTorque = CoastingTorque;
+                WheelSpeed = 0.0f;
+            }
+            else
+            {
+                // Set gravity according to the rotation of the car
+                gravity.Value = Vector2.Zero;
+
+                if (throttle * WheelSpeed >= -ThrottleTolerance)
+                {
+                    // Accelerating
+                    throttleIndicator.Color = Color.Green;
+
+                    float carSpeed = body.LinearVelocity.Length();
+
+                    if (carSpeed > TopSpeed)
+                        WheelTorque = 0.0f;
+                    else if (carSpeed > Math.Abs(throttle) * TopSpeed - AccelerationCurveThreshold)
+                        WheelTorque = Math.Max(0.0f, AccelerationTorque * ((Math.Abs(throttle) * TopSpeed - carSpeed) / AccelerationCurveThreshold));
+                    else
+                        WheelTorque = AccelerationTorque;
+
+                    WheelSpeed = throttle > 0 ? float.MaxValue : float.MinValue;
+                }
+                else
+                {
+                    // Braking
+                    throttleIndicator.Color = Color.Red;
+                    WheelTorque = BrakingTorque;
+                    WheelSpeed = 0.0f;
+                }
+            }
+
             if (body.LinearVelocity.Length() > SpeedLimit)
             {
-                // Car is supersonic - limit the velocity
+                // Car has exceeded the sped limit - limit the velocity
                 limitIndicator.Visible = true;
 
                 Vector2 limitVelocity = body.LinearVelocity;
@@ -205,52 +296,11 @@ namespace UltimateSocCar.Components
             }
 
             if (boosting) // Apply the boosting force at the car's absolute center of mass
-                body.ApplyForce(Vector2.Transform(Vector2.UnitX, Matrix.CreateRotationZ(body.Rotation)) * new Vector2(BoostForceX, BoostForceY),
+                body.ApplyForce(Vector2.Transform(Vector2.UnitX, Matrix.CreateRotationZ(body.Rotation)) *
+                    new Vector2(BoostForceX, Grounded ? BoostForceX : BoostForceY),
                     PhysicsHelper.CenterOfMass(body, rearWheel.Body, frontWheel.Body));
 
-            if (!PartiallyGrounded || throttle == 0.0f)
-            {
-                if (Grounded) // Apply fake gravity force + fake real gravity force
-                    gravity.Value = RelativeGravity + Vector2.Transform(App.Instance.Scene.PhysicsWorld.Gravity,
-                        Matrix.CreateRotationZ(body.Rotation - (float)(Math.PI * 0.5))) * (float)Math.Sin(body.Rotation);
-                else // Car is free - apply normal gravity
-                    gravity.Value = App.Instance.Scene.PhysicsWorld.Gravity;
-
-                throttleIndicator.Color = Color.Yellow;
-
-                WheelTorque = CoastingTorque;
-                WheelSpeed = 0.0f;
-            }
-            else
-            {
-                // Set gravity according to the rotation of the car
-                gravity.Value = RelativeGravity;
-
-                if (throttle * WheelSpeed >= -ThrottleTolerance)
-                {
-                    // Accelerating
-                    throttleIndicator.Color = Color.Green;
-
-                    float absSpeed = Math.Abs(WheelSpeed);
-
-                    // Modulate acceleration curves
-                    if (absSpeed > WheelTopSpeed)
-                        WheelTorque = 0.0f;
-                    else if (absSpeed > Math.Abs(throttle) * WheelTopSpeed - AccelerationCurveThreshold)
-                        WheelTorque = Math.Max(0, AccelerationTorque * ((Math.Abs(throttle) * WheelTopSpeed - absSpeed) / AccelerationCurveThreshold));
-                    else
-                        WheelTorque = AccelerationTorque;
-
-                    WheelSpeed = throttle * WheelTopSpeed;
-                }
-                else
-                {
-                    // Braking
-                    throttleIndicator.Color = Color.Red;
-                    WheelTorque = BrakingTorque;
-                    WheelSpeed = 0.0f;
-                }
-            }
+            tryJump = false;
         }
 
         /// <summary>
@@ -267,6 +317,26 @@ namespace UltimateSocCar.Components
             wheel.Create(WheelRadius, relativePosition);
 
             return wheel;
+        }
+
+        /// <summary>
+        /// Removes the ButtonStateChanged event listener.
+        /// </summary>
+        protected override void OnDestroy()
+        {
+            Input.Instance.OnButtonStateChanged -= ButtonStateChanged;
+        }
+
+        /// <summary>
+        /// Listens for button presses.
+        /// </summary>
+        /// <param name="playerID"></param>
+        /// <param name="button"></param>
+        /// <param name="state"></param>
+        private void ButtonStateChanged(int playerID, Buttons button, ButtonState state)
+        {
+            if (button == Buttons.A && state == ButtonState.Pressed)
+                tryJump = true;
         }
     }
 }

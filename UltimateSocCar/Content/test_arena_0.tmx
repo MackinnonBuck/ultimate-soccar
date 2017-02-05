@@ -6,35 +6,35 @@
   </data>
  </layer>
  <objectgroup name="Static Objects">
-  <object id="4" name="MainCar" type="Car" x="224" y="1504" width="96" height="32"/>
-  <object id="8" name="Ground" x="1600" y="1600">
+  <object id="4" name="MainCar" type="Car" x="224" y="1280" width="96" height="32"/>
+  <object id="8" name="Ground" x="1600" y="1376">
    <polyline points="-320,0 -248,-8 -194,-20 -132,-44 -62.6667,-90 0,-160"/>
   </object>
-  <object id="12" name="Ground" x="0" y="1504">
+  <object id="12" name="Ground" x="0" y="1280">
    <polyline points="0,0 2.5,17.5 6,32 13,46.5 23.5,59 38.5,71 66,83 110.5,90 150.5,92.5 224,96"/>
   </object>
-  <object id="13" name="Ground" x="2976" y="1504">
+  <object id="13" name="Ground" x="2976" y="1280">
    <polyline points="223.5,0 221,17.5 217.5,32 210.5,46.5 200,59 185,71 157.5,83 113,90 73,92.5 0,96"/>
   </object>
-  <object id="15" name="Ground" x="224" y="1600">
+  <object id="15" name="Ground" x="224" y="1376">
    <polyline points="0,0 2752,0"/>
   </object>
-  <object id="17" name="Ground" x="3200" y="672" rotation="-180">
+  <object id="17" name="Ground" x="3200" y="448" rotation="-180">
    <polyline points="0,0 2.5,17.5 6,32 13,46.5 23.5,59 38.5,71 66,83 110.5,90 150.5,92.5 224,96"/>
   </object>
-  <object id="18" name="Ground" x="224" y="672" rotation="-180">
+  <object id="18" name="Ground" x="224" y="448" rotation="-180">
    <polyline points="224,0 221.5,17.5 218,32 211,46.5 200.5,59 185.5,71 158,83 113.5,90 73.5,92.5 0,96"/>
   </object>
-  <object id="19" name="Ground" x="224" y="576">
+  <object id="19" name="Ground" x="224" y="352">
    <polyline points="0,0 2752,0"/>
   </object>
-  <object id="20" name="Ground" x="0" y="96">
+  <object id="20" name="Ground" x="0" y="-128">
    <polyline points="0,576 0,1408"/>
   </object>
-  <object id="21" name="Ground" x="3200" y="1504">
+  <object id="21" name="Ground" x="3200" y="1280">
    <polyline points="0,0 0,-832"/>
   </object>
-  <object id="23" name="Ground" x="1920" y="1600">
+  <object id="23" name="Ground" x="1920" y="1376">
    <polyline points="0,0 -72,-8 -126,-20 -188,-44 -257.333,-90 -320,-160"/>
   </object>
  </objectgroup>

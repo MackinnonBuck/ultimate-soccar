@@ -52,6 +52,7 @@
     <Compile Include="Testing\TestComponent.cs" />
     <Compile Include="Testing\TestDefinition.cs" />
     <Compile Include="Testing\TestScene.cs" />
+    <Compile Include="Utilities\TimeKeeper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

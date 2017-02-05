@@ -97,7 +97,7 @@ namespace MonoEngine.ResourceManagement
             if (textures.ContainsKey(id))
             {
                 Texture2D texture = textures[id];
-                Vector2 textureOrigin = origin ?? new Vector2(texture.Width / 2, texture.Height / 2);
+                Vector2 textureOrigin = origin ?? new Vector2(texture.Width * 0.5f, texture.Height * 0.5f);
                 spriteBatch.Draw(texture, position, sourceRectangle, color, rotation, textureOrigin, scale, effects, layerDepth);
             }            
         }

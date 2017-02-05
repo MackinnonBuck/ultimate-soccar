@@ -11,13 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FarseerPhysics.Dynamics.Contacts;
+using FarseerPhysics.Controllers;
 
 namespace UltimateSocCar.Components
 {
     public class Wheel : Component
     {
         // Constants
-
         const float Density = 0.25f;
         const float Friction = 1000.0f;
         const float SuspensionFrequency = 15.0f;
@@ -30,7 +30,6 @@ namespace UltimateSocCar.Components
         public Body Body { get; private set; }
         public Fixture Fixture { get; private set; }
         public WheelJoint WheelJoint { get; private set; }
-        public FrictionJoint FrictionJoint { get; private set; }
 
         /// <summary>
         /// Returns true if contact with the ground is being made.
@@ -46,23 +45,12 @@ namespace UltimateSocCar.Components
         /// <summary>
         /// Gets the ground contact normal or the relative down vector if no contact is present.
         /// </summary>
-        public Vector2 GroundNormal
-        {
-            get
-            {
-                if (contacts.Count == 0)
-                    return Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(parentBody.Rotation));
-                
-                Vector2 normalAvg = new Vector2();
+        public Vector2 GroundNormal { get; private set; }
 
-                foreach (Vector2 normal in (from x in contacts where x.Value.IsTouching == true select x.Value.Manifold.LocalNormal))
-                    normalAvg += normal;
-
-                normalAvg /= contacts.Count;
-
-                return normalAvg;
-            }
-        }
+        /// <summary>
+        /// Returns true if the wheel can stick to the current surface.
+        /// </summary>
+        public bool Sticky { get; private set; }
 
         /// <summary>
         /// Creates a wheel from the given radius and position.
@@ -93,6 +81,35 @@ namespace UltimateSocCar.Components
             WheelJoint.MaxMotorTorque = 0.0f;
             WheelJoint.Frequency = SuspensionFrequency;
             WheelJoint.DampingRatio = SuspentionDampingRatio;
+
+            Parent.AddComponent<TextureRenderer>().TextureID = "Wheel";
+        }
+
+        /// <summary>
+        /// Updates values of the Wheel.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected override void OnUpdate(GameTime gameTime)
+        {
+            // Calculate ground normal
+            if (contacts.Count == 0)
+            {
+                GroundNormal = Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(parentBody.Rotation));
+                Sticky = false;
+            }
+            else
+            {
+                Vector2 normalAvg = new Vector2();
+
+                foreach (Vector2 normal in (from x in contacts where x.Value.IsTouching == true select x.Value.Manifold.LocalNormal))
+                    normalAvg += normal;
+
+                normalAvg /= contacts.Count;
+
+                GroundNormal = normalAvg;
+
+                Sticky = GroundNormal.Y <= 0 || GroundNormal.Y <= Math.Abs(GroundNormal.X);
+            }
         }
 
         /// <summary>

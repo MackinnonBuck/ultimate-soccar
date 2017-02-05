@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoEngine.Components;
 using FarseerPhysics.Dynamics;
+using FarseerPhysics;
+using FarseerPhysics.Controllers;
+using MonoEngine.ResourceManagement;
 
 namespace UltimateSocCar.Scenes
 {
@@ -21,7 +24,11 @@ namespace UltimateSocCar.Scenes
 
         protected override void OnInitialize()
         {
+            Debug.Clear();
             DebugDrawEnabled = true;
+
+            TextureManager.Instance.Load("Textures/Car", "Car");
+            TextureManager.Instance.Load("Textures/Wheel", "Wheel");
 
             car = GameObject.Get(null, "MainCar");
 

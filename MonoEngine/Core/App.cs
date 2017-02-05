@@ -61,7 +61,7 @@ namespace MonoEngine.Core
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / frameRate);
 
-            Settings.MaxPolygonVertices = 32;
+            Settings.MaxPolygonVertices = 32;       
 
             ChangeScene(mainScene);
         }
